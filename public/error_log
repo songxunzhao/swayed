@@ -1,0 +1,17 @@
+[17-May-2016 13:49:22 UTC] PHP Parse error:  syntax error, unexpected end of file in /home/webdev/public_html/swayed/src/routes.php on line 19
+[17-May-2016 13:49:38 UTC] PHP Parse error:  syntax error, unexpected '$app' (T_VARIABLE) in /home/webdev/public_html/swayed/src/routes.php on line 12
+[17-May-2016 14:23:01 UTC] PHP Fatal error:  Class 'User' not found in /home/webdev/public_html/swayed/src/routes.php on line 26
+[17-May-2016 15:08:17 UTC] PHP Fatal error:  Cannot access protected property Slim\Http\Response::$headers in /home/webdev/public_html/swayed/src/routes.php on line 51
+[17-May-2016 15:08:22 UTC] PHP Fatal error:  Cannot access protected property Slim\Http\Response::$headers in /home/webdev/public_html/swayed/src/routes.php on line 51
+[17-May-2016 15:08:36 UTC] PHP Fatal error:  Cannot access protected property Slim\Http\Response::$headers in /home/webdev/public_html/swayed/src/routes.php on line 51
+[17-May-2016 15:08:49 UTC] PHP Fatal error:  Cannot access protected property Slim\Http\Response::$headers in /home/webdev/public_html/swayed/src/routes.php on line 51
+[17-May-2016 15:09:15 UTC] PHP Fatal error:  Cannot access protected property Slim\Http\Response::$headers in /home/webdev/public_html/swayed/src/routes.php on line 51
+[17-May-2016 15:09:15 UTC] PHP Fatal error:  Cannot access protected property Slim\Http\Response::$headers in /home/webdev/public_html/swayed/src/routes.php on line 51
+[17-May-2016 15:13:18 UTC] PHP Fatal error:  Cannot use object of type stdClass as array in /home/webdev/public_html/swayed/src/routes.php on line 6
+[18-May-2016 09:45:23 UTC] PHP Fatal error:  Cannot access protected property Slim\Http\Request::$headers in /home/webdev/public_html/swayed/src/routes.php on line 98
+[18-May-2016 15:32:42 UTC] PHP Fatal error:  Class 'User' not found in /home/webdev/public_html/swayed/src/routes.php on line 110
+[18-May-2016 15:33:47 UTC] PHP Fatal error:  Class 'User' not found in /home/webdev/public_html/swayed/src/routes.php on line 110
+[19-May-2016 02:35:46 UTC] PHP Fatal error:  Call to a member function getBody() on null in /home/webdev/public_html/swayed/src/routes.php on line 93
+[19-May-2016 09:27:30 UTC] PHP Fatal error:  Call to undefined method Slim\Http\Request::getPath() in /home/webdev/public_html/swayed/src/routes.php on line 29
+[19-May-2016 09:38:33 UTC] PHP Parse error:  syntax error, unexpected '{', expecting ')' in /home/webdev/public_html/swayed/src/routes.php on line 265
+[19-May-2016 09:41:20 UTC] PHP Catchable fatal error:  Argument 1 passed to Illuminate\Database\Grammar::parameterize() must be of the type array, string given, called in /home/webdev/public_html/swayed/vendor/illuminate/database/Query/Grammars/Grammar.php on line 694 and defined in /home/webdev/public_html/swayed/vendor/illuminate/database/Grammar.php on line 118
