@@ -105,25 +105,23 @@ $app->post('/v1/user/signup', function ($request, $response, $args) {
 	$user->save();
 
 	if ($user_type == "brand") {
-		$brand = new \Brand;
-		$brand->user_id = $user->uuid;
-		$brand->save();
+		$profile = new \Brand;
+		$profile->user_id = $user->uuid;
+		$profile->save();
 	} else {
-		$influencer = new \Influencer;
-		$influencer->user_id = $user->uuid;
-		$influencer->save();
+		$profile = new \Influencer;
+		$profile->user_id = $user->uuid;
+		$profile->save();
 	}
 
 	$resp['data'] = array();
 	$resp['data']['token'] =  genToken($user->uuid);
 	$resp['data']['profile'] = array();
+	$resp['data']['profile'] = $profile->toArray();
 	$resp['data']['profile']['email'] = $email;
 	$resp['data']['profile']['name'] = $name;
 	$resp['data']['profile']['user_type'] = $user_type;
-	$resp['data']['profile']['location'] = "";
-	$resp['data']['profile']['description'] = "";
-	$resp['data']['profile']['social_id'] = "";
-	$resp['data']['profile']['social_token'] = "";
+
 
 	end:
     $response->getBody()->write(json_encode($resp));
@@ -165,17 +163,25 @@ $app->post('/v1/user/login', function ($request, $response, $args) {
 		}
 	}
 
+	if ($user->user_type == "brand") {
+		$profile = \Brand::where("user_id", "=", $user->uuid)->first();
+	} else {
+		$profile = \Influencer::where("user_id", "=", $user->uuid)->first();
+	}
+
 	$resp['data'] = array();
 	$resp['data']['token'] =  genToken($user->uuid);
-	$resp['data']['profile'] = array();
+	$resp['data']['profile'] = $profile->toArray();
 	$resp['data']['profile']['email'] = $user->email;
 	$resp['data']['profile']['name'] = $user->name;
 	$resp['data']['profile']['user_type'] = $user->user_type;
-	$resp['data']['profile']['location'] = "";
-	$resp['data']['profile']['description'] = "";
-	$resp['data']['profile']['social_id'] = "";
-	$resp['data']['profile']['social_token'] = "";
 
+	$tags = \UserInterest::where("user_id", "=", $user->uuid)->get();
+	$tagName = array();
+	foreach ($tags as $item) {
+		$tagName[] = $item->tag;
+	}
+	$resp['data']['profile']['interests'] = $tagName;
 
 	end:
     $response->getBody()->write(json_encode($resp));
@@ -223,6 +229,8 @@ $app->post('/v1/images', function ($request, $response, $args) {
 
 $app->post('/v1/campaign', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
+	$user = \User::where("uuid", "=", $userid)->first();
+
 	$data = $request->getParsedBody();
 	$main_image = $data['main_image'];
 	$objective = $data['objective'];
@@ -237,6 +245,11 @@ $app->post('/v1/campaign', function ($request, $response, $args) {
 	$resp['code'] = 200;
 	$resp['data'] = "";
 
+	if ($user->user_type == "influencer") {
+		$resp['error'] = "Only brand can do that";
+		$resp['code'] = 400;
+		goto end;
+	}
 	if (empty($main_image) || empty($objective) || empty($allow_action) || empty($ban_action)) {
 		$resp['error'] = "Invalid Data";
 		$resp['code'] = 400;
@@ -252,8 +265,19 @@ $app->post('/v1/campaign', function ($request, $response, $args) {
 	$campaign->brand_id = $userid;
 	$campaign->detail_image = json_encode($detail_images);
 	$campaign->save();
+
+	if (!empty($required_tags)) {
+		for ($i = 0; $i < count($required_tags); $i ++) {
+			$tag = new \CampaignTag;
+			$tag->uuid = uniqid();
+			$tag->campaign_id = $campaign->uuid;
+			$tag->tag = $required_tags[$i];
+			$tag->save();
+		}
+	}
 	
 	$resp['data'] = $campaign->toArray();
+	$resp['data']['required_tags'] = $required_tags;
 	$resp['data']['token'] = genToken($userid);
 
 	end:
@@ -266,6 +290,7 @@ $app->post('/v1/campaign', function ($request, $response, $args) {
 $app->post('/v1/campaign/{camid}', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
 	$camid = ($request->getAttribute("camid"));
+	$user = \User::where("uuid", "=", $userid)->first();
 
 	$data = $request->getParsedBody();
 	$main_image = $data['main_image'];
@@ -280,6 +305,12 @@ $app->post('/v1/campaign/{camid}', function ($request, $response, $args) {
 	$resp['error'] = "";
 	$resp['code'] = 200;
 	$resp['data'] = "";
+
+	if ($user->user_type == "influencer") {
+		$resp['error'] = "Only brand can do that";
+		$resp['code'] = 400;
+		goto end;
+	}
 
 	if (empty($main_image) || empty($objective) || empty($allow_action) || empty($ban_action)) {
 		$resp['error'] = "Invalid Data";
@@ -312,9 +343,20 @@ $app->post('/v1/campaign/{camid}', function ($request, $response, $args) {
 	if (!empty($detail_images)) {
 		$campaign->detail_image = json_encode($detail_images);
 	}
+	if (!empty($required_tags)) {
+		\CampaignTag::where("campaign_id", "=", $camid)->delete();
+		for ($i = 0; $i < count($required_tags); $i ++) {
+			$tag = new \CampaignTag;
+			$tag->uuid = uniqid();
+			$tag->campaign_id = $campaign->uuid;
+			$tag->tag = $required_tags[$i];
+			$tag->save();
+		}
+	}
 	$campaign->save();
 	
 	$resp['data'] = $campaign->toArray();
+	$resp['data']['required_tags'] =$required_tags;
 	$resp['data']['token'] = genToken($userid);
 
 	end:
@@ -331,6 +373,7 @@ $app->post('/v1/user/profile/', function ($request, $response, $args) {
 	$social_id = $data['social_id'];
 	$social_token = $data['social_token'];
 	$description = $data['description'];
+	$website = $data['website'];
 
 	$gender = $data['gender'];
 	$country = $data['country'];
@@ -350,6 +393,9 @@ $app->post('/v1/user/profile/', function ($request, $response, $args) {
 	}
 	if ($user->user_type == "brand") {
 		$profile1 = \Brand::where("user_id", "=", $user->uuid)->first();
+		if (!empty($website)) {
+			$profile1->website = $website;
+		}
 		if (!empty($profile_img)) {
 			$profile1->profile_img = $profile_img;
 		}
@@ -391,8 +437,102 @@ $app->post('/v1/user/profile/', function ($request, $response, $args) {
 		$resp['data'] = $profile2->toArray();
 	}
 	
-	
+	$resp['data']['name'] = $user->name;
 	$resp['data']['token'] = genToken($userid);
+
+	end:
+    $response->getBody()->write(json_encode($resp));
+
+    return $response;
+});
+
+
+$app->post('/v1/user/rate', function ($request, $response, $args) {
+	$userid = $request->getAttribute('userid');
+
+	$data = $request->getParsedBody();
+	$rate = $data['rate'];
+
+	$resp = array();
+	$resp['error'] = "";
+	$resp['code'] = 200;
+	$resp['data'] = "";
+
+	if (empty($rate)) {
+		$resp['error'] = "Invalid Data";
+		$resp['code'] = 400;
+		goto end;
+	}
+	$user = \User::where("uuid", "=", $userid)->first();
+	if ($user->user_type == "influencer") {
+		$influ = \Influencer::where("user_id", "=", $userid)->first();
+		$influ->rate = $rate;
+		$resp['data']['rate'] = $rate;
+		$influ->save();
+	} else {
+		$resp['error'] = "Only for influencer";
+		$resp['code'] = 400;
+		goto end;
+	}
+
+	end:
+    $response->getBody()->write(json_encode($resp));
+
+    return $response;
+});
+
+$app->post('/v1/user/interests', function ($request, $response, $args) {
+	$userid = $request->getAttribute('userid');
+
+	$data = $request->getParsedBody();
+	
+
+	$resp = array();
+	$resp['error'] = "";
+	$resp['code'] = 200;
+	$resp['data'] = "";
+
+	if (empty($data)) {
+		$resp['error'] = "Invalid Data";
+		$resp['code'] = 400;
+		goto end;
+	}
+	$user = \User::where("uuid", "=", $userid)->first();
+	\UserInterest::where('user_id', '=', $userid)->delete();
+	for ($i = 0; $i < count($data); $i++) {
+		$tag = \InterestTag::where('name', '=', $data[$i])->first();	
+		if ($tag == null) {
+			$tag = new \InterestTag;
+			$tag->name = $data[$i];
+			$tag->save();
+		}
+		$useri = new \UserInterest;
+		$useri->uuid = uniqid();
+		$useri->user_id = $userid;
+		$useri->tag = $data[$i];
+		$useri->save();
+	}
+
+	$resp['data'] = $data;
+	end:
+    $response->getBody()->write(json_encode($resp));
+
+    return $response;
+});
+
+$app->get('/v1/interest_tag', function ($request, $response, $args) {
+	$userid = $request->getAttribute('userid');
+
+	$resp = array();
+	$resp['error'] = "";
+	$resp['code'] = 200;
+
+	$tags = \InterestTag::all();
+	$tagName = array();
+	foreach ($tags as $item) {
+		$tagName[] = $item->name;
+	}
+	$resp['data'] = $tagName;
 
 	end:
     $response->getBody()->write(json_encode($resp));
