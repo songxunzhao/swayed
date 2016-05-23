@@ -341,7 +341,7 @@ $app->post('/v1/campaign/{camid}', function ($request, $response, $args) {
 		$campaign->ban_action = $ban_action;
 	}
 	if (!empty($detail_images)) {
-		$campaign->detail_image = json_encode($detail_images);
+		$campaign->detail_images = json_encode($detail_images);
 	}
 	if (!empty($required_tags)) {
 		\CampaignTag::where("campaign_id", "=", $camid)->delete();
