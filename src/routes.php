@@ -64,7 +64,6 @@ $app->add(function ($request, $response, $next) {
 
 $app->post('/v1/user/signup', function ($request, $response, $args) {
 	$data = $request->getParsedBody();
-	$name = $data['name'];
 	$email = $data['email'];
 	$password = $data['password'];
 	$user_type = $data['user_type'];
@@ -74,7 +73,7 @@ $app->post('/v1/user/signup', function ($request, $response, $args) {
 	$resp['code'] = 200;
 	$resp['data'] = "";
 	//valiate
-	if (empty($password) || empty($email) || empty($name) || empty($user_type)) {
+	if (empty($password) || empty($email) || empty($user_type)) {
 		$resp['error'] = "Invalid data"; 
 		$resp['code'] = 400;
 		goto end;
@@ -99,7 +98,6 @@ $app->post('/v1/user/signup', function ($request, $response, $args) {
 	$user = new \User;
 	$user->email = $email;
 	$user->password = md5($password);
-	$user->name = $name;
 	$user->user_type = $user_type;
 	$user->uuid = uniqid();
 	$user->save();
@@ -119,7 +117,6 @@ $app->post('/v1/user/signup', function ($request, $response, $args) {
 	$resp['data']['profile'] = array();
 	$resp['data']['profile'] = $profile->toArray();
 	$resp['data']['profile']['email'] = $email;
-	$resp['data']['profile']['name'] = $name;
 	$resp['data']['profile']['user_type'] = $user_type;
 
 
