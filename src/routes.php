@@ -97,6 +97,7 @@ $app->post('/v1/user/signup', function ($request, $response, $args) {
 	//signup
 	$user = new \User;
 	$user->email = $email;
+    $user->name = '';
 	$user->password = md5($password);
 	$user->user_type = $user_type;
 	$user->uuid = uniqid();
