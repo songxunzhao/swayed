@@ -1,4 +1,6 @@
 <?php
+
+//test 
 //function
 function genToken($userid) {
 	$tk = \Token::where("user_id", "=", $userid)->first();
@@ -275,6 +277,7 @@ $app->post('/v1/campaign', function ($request, $response, $args) {
 	}
 	
 	$resp['data'] = $campaign->toArray();
+	$resp['data']['detail_images'] = json_decode($campaign->detail_images, true);
 	$resp['data']['required_tags'] = $required_tags;
 	$resp['data']['token'] = genToken($userid);
 
@@ -285,7 +288,7 @@ $app->post('/v1/campaign', function ($request, $response, $args) {
 });
 
 
-$app->post('/v1/campaign/{camid}', function ($request, $response, $args) {
+$app->post('/v1/campaign/id/{camid}', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
 	$camid = ($request->getAttribute("camid"));
 	$user = \User::where("uuid", "=", $userid)->first();
@@ -354,8 +357,158 @@ $app->post('/v1/campaign/{camid}', function ($request, $response, $args) {
 	$campaign->save();
 	
 	$resp['data'] = $campaign->toArray();
+	$resp['data']['detail_images'] = json_decode($campaign->detail_images, true);
 	$resp['data']['required_tags'] =$required_tags;
 	$resp['data']['token'] = genToken($userid);
+
+	end:
+    $response->getBody()->write(json_encode($resp));
+
+    return $response;
+});
+
+
+$app->get('/v1/campaign/{camid}', function ($request, $response, $args) {
+	$userid = $request->getAttribute('userid');
+	$camid = ($request->getAttribute("camid"));
+	$user = \User::where("uuid", "=", $userid)->first();
+
+	$resp = array();
+	$resp['error'] = "";
+	$resp['code'] = 200;
+	$resp['data'] = "";
+
+
+	$campaign = \Campaign::where("uuid", "=", $camid)->first();
+	if ($campaign == null) { 
+		$resp['error'] = "Campain not found";
+		$resp['code'] = 404;
+		goto end;
+	}
+
+	$campainTag = \CampaignTag::where("campaign_id", "=", $camid)->get();
+	$required_tags = array();
+	foreach ($campainTag as $item) { 
+		$required_tags[] = $item->tag;
+	}
+	
+	$resp['data'] = $campaign->toArray();
+	$resp['data']['detail_images'] = json_decode($campaign->detail_images, true);
+	$resp['data']['required_tags'] = $required_tags;
+	$resp['data']['token'] = genToken($userid);
+
+	end:
+    $response->getBody()->write(json_encode($resp));
+
+    return $response;
+});
+
+$app->post('/v1/campaign/list', function ($request, $response, $args) {
+	$userid = $request->getAttribute('userid');
+	$user = \User::where("uuid", "=", $userid)->first();
+
+	$page_size = isset($_GET['page_size']) ? $_GET['page_size'] : 20;
+	$page = isset($_GET['page']) ? $_GET['page'] : 1;
+
+	$data = $request->getParsedBody();
+
+
+	$resp = array();
+	$resp['error'] = "";
+	$resp['code'] = 200;
+	$resp['data'] = "";
+
+	if (!empty($data['filter'])) {
+		$tag = \CampaignTag::whereIn("tag", $data['filter'])->get();
+		$uuid = array();
+		foreach ($tag as $t) {
+			$uuid[] = $t->campaign_id;
+		}
+		$campaign = \Campaign::whereIn("uuid", $uuid)->take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC")->get();
+		$campaignCount = \Campaign::whereIn("uuid", $uuid)->count();
+	} else if (!empty($data['search'])) {
+		$campaign = \Campaign::where("name", "LIKE", "%" . $data['search'] . "%")->take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC")->get();
+		$campaignCount = \Campaign::where("name", "LIKE", "%" . $data['search'] . "%")->count();
+	} else {
+		$resp['error'] = "Invalid Data";
+		$resp['code'] = 400;
+		goto end;
+	}
+
+	foreach ($campaign as &$cam) {
+		$cam->detail_images = json_decode($cam->detail_images, true);
+	}
+	
+	
+	$resp['data']['data'] = $campaign->toArray();
+	$resp['data']['token'] = genToken($userid);
+	$resp['data']['count'] = $campaignCount;
+	if ($page_size * $page < $campaignCount) {
+		$resp['data']['next'] = '/v1/campaign/list?page_size=' . $page_size . '&page=' . ($page + 1); 
+	} else {
+		$resp['data']['next'] = null;
+	}
+	if ($page > 1) {
+		$resp['data']['prev'] = '/v1/campaign/list?page_size=' . $page_size . '&page=' . ($page - 1); 
+	} else {
+		$resp['data']['prev'] = null; 
+	}
+
+
+	end:
+    $response->getBody()->write(json_encode($resp));
+
+    return $response;
+});
+
+$app->get('/v1/brand/campaign', function ($request, $response, $args) {
+	$userid = $request->getAttribute('userid');
+	$user = \User::where("uuid", "=", $userid)->first();
+
+	$page_size = isset($_GET['page_size']) ? $_GET['page_size'] : 20;
+	$page = isset($_GET['page']) ? $_GET['page'] : 1;
+	$status = isset($_GET['status']) ? $_GET['status'] : 0;
+
+	$data = $request->getParsedBody();
+
+
+	$resp = array();
+	$resp['error'] = "";
+	$resp['code'] = 200;
+	$resp['data'] = "";
+
+	if ($user->user_type == "influencer") {
+		$resp['error'] = "Only brand can do that";
+		$resp['code'] = 400;
+		goto end;
+	}
+	if ($status > 0) {
+		$campaign = \Campaign::where("brand_id", "=", $userid)->where("status", "=", $status)->take($page_size)->skip($page_size*($page - 1))->orderBy("status", "ASC")->orderBy("created_at", "DESC")->get();
+		$campaignCount = \Campaign::where("brand_id", "=", $userid)->where("status", "=", $status)->count();
+
+	} else {
+		$campaign = \Campaign::where("brand_id", "=", $userid)->take($page_size)->skip($page_size*($page - 1))->orderBy("status", "ASC")->orderBy("created_at", "DESC")->get();
+		$campaignCount = \Campaign::where("brand_id", "=", $userid)->count();
+	}
+
+	foreach ($campaign as &$cam) {
+		$cam->detail_images = json_decode($cam->detail_images, true);
+	}
+	
+	$resp['data']['data'] = $campaign->toArray();
+	$resp['data']['token'] = genToken($userid);
+	$resp['data']['count'] = $campaignCount;
+	if ($page_size * $page < $campaignCount) {
+		$resp['data']['next'] = '/v1/campaign/list?page_size=' . $page_size . '&page=' . ($page + 1); 
+	} else {
+		$resp['data']['next'] = null;
+	}
+	if ($page > 1) {
+		$resp['data']['prev'] = '/v1/campaign/list?page_size=' . $page_size . '&page=' . ($page - 1); 
+	} else {
+		$resp['data']['prev'] = null; 
+	}
+
 
 	end:
     $response->getBody()->write(json_encode($resp));

@@ -17,3 +17,5 @@
 [19-May-2016 09:41:20 UTC] PHP Catchable fatal error:  Argument 1 passed to Illuminate\Database\Grammar::parameterize() must be of the type array, string given, called in /home/webdev/public_html/swayed/vendor/illuminate/database/Query/Grammars/Grammar.php on line 694 and defined in /home/webdev/public_html/swayed/vendor/illuminate/database/Grammar.php on line 118
 [20-May-2016 07:32:13 UTC] PHP Parse error:  syntax error, unexpected ')', expecting ';' in /home/webdev/public_html/swayed/src/routes.php on line 459
 [20-May-2016 11:04:51 UTC] PHP Fatal error:  Call to a member function toArray() on null in /home/webdev/public_html/swayed/src/routes.php on line 173
+[31-May-2016 14:57:29 UTC] PHP Fatal error:  Call to a member function toArray() on null in /home/webdev/public_html/swayed/src/routes.php on line 174
+[31-May-2016 15:16:55 UTC] PHP Warning:  Invalid argument supplied for foreach() in /home/webdev/public_html/swayed/src/routes.php on line 436
