@@ -19,3 +19,5 @@
 [20-May-2016 11:04:51 UTC] PHP Fatal error:  Call to a member function toArray() on null in /home/webdev/public_html/swayed/src/routes.php on line 173
 [31-May-2016 14:57:29 UTC] PHP Fatal error:  Call to a member function toArray() on null in /home/webdev/public_html/swayed/src/routes.php on line 174
 [31-May-2016 15:16:55 UTC] PHP Warning:  Invalid argument supplied for foreach() in /home/webdev/public_html/swayed/src/routes.php on line 436
+[01-Jun-2016 14:02:31 UTC] PHP Fatal error:  Call to a member function toArray() on null in /home/webdev/public_html/swayed/src/routes.php on line 174
+[02-Jun-2016 16:40:04 UTC] PHP Warning:  Invalid argument supplied for foreach() in /home/webdev/public_html/swayed/src/routes.php on line 805

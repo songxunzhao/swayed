@@ -691,6 +691,129 @@ $app->get('/v1/interest_tag', function ($request, $response, $args) {
     return $response;
 });
 
+$app->post('/v1/campaign/{camid}/apply', function ($request, $response, $args) {
+	$userid = $request->getAttribute('userid');
+	$camid = ($request->getAttribute("camid"));
+
+	$resp = array();
+	$resp['error'] = "";
+	$resp['code'] = 200;
+	$resp['data'] = "";
+
+	if (empty($camid)) {
+		$resp['error'] = "Invalid Data";
+		$resp['code'] = 400;
+		goto end;
+	}
+
+	$user = \User::where("uuid", "=", $userid)->first();
+
+	if ($user->user_type == "brand") {
+		$resp['error'] = "Only influencer can do that";
+		$resp['code'] = 400;
+		goto end;
+	}
+
+	$campaignContract = \CampaignContract::where("influencer_id", "=", $userid)->where("campaign_id", "=", $camid)->first();
+	if ($campaignContract != null) {
+		$resp['error'] = "You already applied for this campagin";
+		$resp['code'] = 403;
+		goto end;
+	} else {
+		$campaignContract = new \CampaignContract;
+		$campaignContract->uuid = uniqid();
+		$campaignContract->campaign_id = $camid;
+		$campaignContract->influencer_id = $userid;
+		$campaignContract->save();
+	}
+	
+
+	$resp['data'] = $campaignContract->toArray();
+	end:
+    $response->getBody()->write(json_encode($resp));
+
+    return $response;
+});
+
+$app->post('/v1/campaign/{camid}/influencer/{influid}/offer', function ($request, $response, $args) {
+	$userid = $request->getAttribute('userid');
+	$camid = ($request->getAttribute("camid"));
+	$influid = ($request->getAttribute("influid"));
+
+	$resp = array();
+	$resp['error'] = "";
+	$resp['code'] = 200;
+	$resp['data'] = "";
+
+	if (empty($camid)) {
+		$resp['error'] = "Invalid Data";
+		$resp['code'] = 400;
+		goto end;
+	}
+
+	$user = \User::where("uuid", "=", $userid)->first();
+
+	if ($user->user_type == "influencer") {
+		$resp['error'] = "Only brand can do that";
+		$resp['code'] = 400;
+		goto end;
+	}
+
+	$campaignContract = \CampaignContract::where("influencer_id", "=", $influid)->where("campaign_id", "=", $camid)->first();
+	if ($campaignContract != null) {
+		$resp['error'] = "This influencer already applied for this campagin";
+		$resp['code'] = 403;
+		goto end;
+	} else {
+		$campaignContract = new \CampaignContract;
+		$campaignContract->uuid = uniqid();
+		$campaignContract->campaign_id = $camid;
+		$campaignContract->influencer_id = $influid;
+		$campaignContract->status = 3;
+		$campaignContract->save();
+	}
+	
+
+	$resp['data'] = $campaignContract->toArray();
+	end:
+    $response->getBody()->write(json_encode($resp));
+
+    return $response;
+});
+
+
+$app->post('/v1/campaign/{camid}/influencer/list', function ($request, $response, $args) {
+	$userid = $request->getAttribute('userid');
+	$camid = ($request->getAttribute("camid"));
+
+	$resp = array();
+	$resp['error'] = "";
+	$resp['code'] = 200;
+	$resp['data'] = "";
+
+	if (empty($camid)) {
+		$resp['error'] = "Invalid Data";
+		$resp['code'] = 400;
+		goto end;
+	}
+
+	$user = \User::where("uuid", "=", $userid)->first();
+
+	
+	$campaignContract = \CampaignContract::where("campaign_id", "=", $camid)->get();
+	if ($campaignContract != null) {
+		foreach ($campaignContract as &$item) {
+			$item['influencer'] = \Influencer::where("user_id", "=", $item->influencer_id)->first();
+		}
+	}
+
+	$resp['data'] = $campaignContract->toArray();
+	end:
+    $response->getBody()->write(json_encode($resp));
+
+    return $response;
+});
+
 
 $app->get('/', function ($request, $response, $args) {
    	end:
