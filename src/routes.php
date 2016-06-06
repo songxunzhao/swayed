@@ -261,7 +261,7 @@ $app->post('/v1/campaign', function ($request, $response, $args) {
 	$campaign->ban_action = $ban_action;
 	$campaign->uuid = uniqid();
 	$campaign->brand_id = $userid;
-	$campaign->detail_image = json_encode($detail_images);
+	$campaign->detail_images = json_encode($detail_images);
 	$campaign->save();
 
 	if (!empty($required_tags)) {
