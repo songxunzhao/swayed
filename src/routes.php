@@ -76,7 +76,7 @@ $app->post('/v1/user/signup', function ($request, $response, $args) {
 	$resp['data'] = "";
 	//valiate
 	if (empty($password) || empty($email) || empty($user_type)) {
-		$resp['error'] = "Invalid data"; 
+		$resp['error'] = "Some fields are missing or wrong"; 
 		$resp['code'] = 400;
 		goto end;
 	}
@@ -140,7 +140,7 @@ $app->post('/v1/user/login', function ($request, $response, $args) {
 	$resp['data'] = "";
 	//valiate
 	if (empty($password) || empty($email)) {
-		$resp['error'] = "Invalid data"; 
+		$resp['error'] = "Some fields are missing or wrong"; 
 		$resp['code'] = 400;
 		goto end;
 	}
@@ -199,7 +199,7 @@ $app->post('/v1/images', function ($request, $response, $args) {
 	
 	$files = $request->getUploadedFiles();
     if (empty($files['file'])) {
-    	$resp['error'] = "Invalid Data";
+    	$resp['error'] = "Some fields are missing or wrong";
         $resp['code'] = 400;
 		goto end;
     }
@@ -238,6 +238,7 @@ $app->post('/v1/campaign', function ($request, $response, $args) {
 	$ban_action = $data['ban_action'];
 	$required_tags = $data['required_tags'];
 	$detail_images = $data['detail_images'];
+	$name = $data['name'];
 
 
 	$resp = array();
@@ -250,8 +251,8 @@ $app->post('/v1/campaign', function ($request, $response, $args) {
 		$resp['code'] = 400;
 		goto end;
 	}
-	if (empty($main_image) || empty($objective) || empty($allow_action) || empty($ban_action)) {
-		$resp['error'] = "Invalid Data";
+	if (empty($main_image) || empty($objective) || empty($allow_action) || empty($ban_action) || empty($name)) {
+		$resp['error'] = "Some fields are missing or wrong";
 		$resp['code'] = 400;
 		goto end;
 	}
@@ -261,8 +262,10 @@ $app->post('/v1/campaign', function ($request, $response, $args) {
 	$campaign->objective = $objective;
 	$campaign->allow_action = $allow_action;
 	$campaign->ban_action = $ban_action;
-	$campaign->uuid = uniqid();
+	$campaign->uuid = 'ca'. uniqid();
 	$campaign->brand_id = $userid;
+	$campaign->name = $name;
+	$campaign->status = 1;
 	$campaign->detail_images = json_encode($detail_images);
 	$campaign->save();
 
@@ -288,9 +291,9 @@ $app->post('/v1/campaign', function ($request, $response, $args) {
 });
 
 
-$app->post('/v1/campaign/id/{camid}', function ($request, $response, $args) {
+$app->post('/v1/campaign/ca{camid}', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
-	$camid = ($request->getAttribute("camid"));
+	$camid = 'ca'.($request->getAttribute("camid"));
 	$user = \User::where("uuid", "=", $userid)->first();
 
 	$data = $request->getParsedBody();
@@ -300,6 +303,7 @@ $app->post('/v1/campaign/id/{camid}', function ($request, $response, $args) {
 	$ban_action = $data['ban_action'];
 	$required_tags = $data['required_tags'];
 	$detail_images = $data['detail_images'];
+	$name = $data['name'];
 
 
 	$resp = array();
@@ -314,23 +318,26 @@ $app->post('/v1/campaign/id/{camid}', function ($request, $response, $args) {
 	}
 
 	if (empty($main_image) || empty($objective) || empty($allow_action) || empty($ban_action)) {
-		$resp['error'] = "Invalid Data";
+		$resp['error'] = "Some fields are missing or wrong";
 		$resp['code'] = 400;
 		goto end;
 	}
 	$campaign = \Campaign::where("uuid", "=", $camid)->first();
 	if ($campaign == null) { 
-		$resp['error'] = "Campain not found";
+		$resp['error'] = "Campaign not found";
 		$resp['code'] = 404;
 		goto end;
 	}
 	if ($campaign->brand_id != $userid) { 
-		$resp['error'] = "Not your campain";
+		$resp['error'] = "Not your campaign";
 		$resp['code'] = 400;
 		goto end;
 	}
 	if (!empty($main_image)) {
 		$campaign->main_image = $main_image;
+	}
+	if (!empty($name)) {
+		$campaign->name = $name;
 	}
 	if (!empty($objective)) {
 		$campaign->objective = $objective;
@@ -381,7 +388,7 @@ $app->get('/v1/campaign/{camid}', function ($request, $response, $args) {
 
 	$campaign = \Campaign::where("uuid", "=", $camid)->first();
 	if ($campaign == null) { 
-		$resp['error'] = "Campain not found";
+		$resp['error'] = "Campaign not found";
 		$resp['code'] = 404;
 		goto end;
 	}
@@ -412,31 +419,47 @@ $app->post('/v1/campaign/list', function ($request, $response, $args) {
 
 	$data = $request->getParsedBody();
 
-
 	$resp = array();
 	$resp['error'] = "";
 	$resp['code'] = 200;
 	$resp['data'] = "";
 
-	if (!empty($data['filter'])) {
-		$tag = \CampaignTag::whereIn("tag", $data['filter'])->get();
+
+	$campaign = \Campaign::take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC");
+	$campaignCount = \Campaign::orderBy("created_at", "DESC");
+
+	if (!empty($data['tags'])) {
+		$tag = \CampaignTag::whereIn("tag", $data['tags'])->get();
 		$uuid = array();
 		foreach ($tag as $t) {
 			$uuid[] = $t->campaign_id;
 		}
-		$campaign = \Campaign::whereIn("uuid", $uuid)->take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC")->get();
-		$campaignCount = \Campaign::whereIn("uuid", $uuid)->count();
-	} else if (!empty($data['search'])) {
-		$campaign = \Campaign::where("name", "LIKE", "%" . $data['search'] . "%")->take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC")->get();
-		$campaignCount = \Campaign::where("name", "LIKE", "%" . $data['search'] . "%")->count();
+		$campaign = $campaign->whereIn("uuid", $uuid);
+		$campaignCount = $campaignCount->whereIn("uuid", $uuid);
+	}
+
+	if (!empty($data['search'])) {
+		$campaign = $campaign->where("name", "LIKE", "%" . $data['search'] . "%");
+		$campaignCount = $campaignCount->where("name", "LIKE", "%" . $data['search'] . "%");
+	}
+
+	if (empty($data['tags']) && empty($data['search'])) {
+		$campaign = \Campaign::take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC")->get();
+		$campaignCount = \Campaign::count();
 	} else {
-		$resp['error'] = "Invalid Data";
-		$resp['code'] = 400;
-		goto end;
+		$campaign = $campaign->get();
+		$campaignCount = $campaignCount->count();
 	}
 
 	foreach ($campaign as &$cam) {
 		$cam->detail_images = json_decode($cam->detail_images, true);
+
+		$campainTag = \CampaignTag::where("campaign_id", "=", $cam->uuid)->get();
+		$required_tags = array();
+		foreach ($campainTag as $item) { 
+			$required_tags[] = $item->tag;
+		}
+		$cam->required_tags = $required_tags;
 	}
 	
 	
@@ -542,6 +565,7 @@ $app->post('/v1/user/profile/', function ($request, $response, $args) {
 		$user->name = $name;
 		$user->save();
 	}
+
 	if ($user->user_type == "brand") {
 		$profile1 = \Brand::where("user_id", "=", $user->uuid)->first();
 		if (!empty($website)) {
@@ -610,7 +634,7 @@ $app->post('/v1/user/rate', function ($request, $response, $args) {
 	$resp['data'] = "";
 
 	if (empty($rate)) {
-		$resp['error'] = "Invalid Data";
+		$resp['error'] = "Some fields are missing or wrong";
 		$resp['code'] = 400;
 		goto end;
 	}
@@ -644,7 +668,7 @@ $app->post('/v1/user/interests', function ($request, $response, $args) {
 	$resp['data'] = "";
 
 	if (empty($data)) {
-		$resp['error'] = "Invalid Data";
+		$resp['error'] = "Some fields are missing or wrong";
 		$resp['code'] = 400;
 		goto end;
 	}
@@ -701,7 +725,7 @@ $app->post('/v1/campaign/{camid}/apply', function ($request, $response, $args) {
 	$resp['data'] = "";
 
 	if (empty($camid)) {
-		$resp['error'] = "Invalid Data";
+		$resp['error'] = "Some fields are missing or wrong";
 		$resp['code'] = 400;
 		goto end;
 	}
@@ -716,7 +740,7 @@ $app->post('/v1/campaign/{camid}/apply', function ($request, $response, $args) {
 
 	$campaignContract = \CampaignContract::where("influencer_id", "=", $userid)->where("campaign_id", "=", $camid)->first();
 	if ($campaignContract != null) {
-		$resp['error'] = "You already applied for this campagin";
+		$resp['error'] = "You already applied for this campaign";
 		$resp['code'] = 403;
 		goto end;
 	} else {
@@ -724,6 +748,7 @@ $app->post('/v1/campaign/{camid}/apply', function ($request, $response, $args) {
 		$campaignContract->uuid = uniqid();
 		$campaignContract->campaign_id = $camid;
 		$campaignContract->influencer_id = $userid;
+		$campaignContract->status = "applied";
 		$campaignContract->save();
 	}
 	
@@ -746,7 +771,7 @@ $app->post('/v1/campaign/{camid}/influencer/{influid}/offer', function ($request
 	$resp['data'] = "";
 
 	if (empty($camid)) {
-		$resp['error'] = "Invalid Data";
+		$resp['error'] = "Some fields are missing or wrong";
 		$resp['code'] = 400;
 		goto end;
 	}
@@ -761,7 +786,7 @@ $app->post('/v1/campaign/{camid}/influencer/{influid}/offer', function ($request
 
 	$campaignContract = \CampaignContract::where("influencer_id", "=", $influid)->where("campaign_id", "=", $camid)->first();
 	if ($campaignContract != null) {
-		$resp['error'] = "This influencer already applied for this campagin";
+		$resp['error'] = "This influencer already applied for this campaign";
 		$resp['code'] = 403;
 		goto end;
 	} else {
@@ -782,7 +807,7 @@ $app->post('/v1/campaign/{camid}/influencer/{influid}/offer', function ($request
 });
 
 
-$app->post('/v1/campaign/{camid}/influencer/list', function ($request, $response, $args) {
+$app->get('/v1/campaign/{camid}/influencer/list', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
 	$camid = ($request->getAttribute("camid"));
 
@@ -792,7 +817,7 @@ $app->post('/v1/campaign/{camid}/influencer/list', function ($request, $response
 	$resp['data'] = "";
 
 	if (empty($camid)) {
-		$resp['error'] = "Invalid Data";
+		$resp['error'] = "Some fields are missing or wrong";
 		$resp['code'] = 400;
 		goto end;
 	}
@@ -808,6 +833,79 @@ $app->post('/v1/campaign/{camid}/influencer/list', function ($request, $response
 	}
 
 	$resp['data'] = $campaignContract->toArray();
+	end:
+    $response->getBody()->write(json_encode($resp));
+
+    return $response;
+});
+
+
+$app->post('/v1/influencer/list', function ($request, $response, $args) {
+	$userid = $request->getAttribute('userid');
+	$user = \User::where("uuid", "=", $userid)->first();
+
+	$page_size = isset($_GET['page_size']) ? $_GET['page_size'] : 20;
+	$page = isset($_GET['page']) ? $_GET['page'] : 1;
+
+	$data = $request->getParsedBody();
+
+	$resp = array();
+	$resp['error'] = "";
+	$resp['code'] = 200;
+	$resp['data'] = "";
+
+
+	$campaign = \Influencer::take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC");
+	$campaignCount = \Influencer::orderBy("created_at", "DESC");
+
+	if (!empty($data['tags'])) {
+		$tag = \UserInterest::whereIn("tag", $data['tags'])->get();
+		$uuid = array();
+		foreach ($tag as $t) {
+			$uuid[] = $t->user_id;
+		}
+		$campaign = $campaign->whereIn("user_id", $uuid);
+		$campaignCount = $campaignCount->whereIn("user_id", $uuid);
+	}
+
+	if (!empty($data['gender'])) {
+		$campaign = $campaign->where("gender", "=", $data['gender']);
+		$campaignCount = $campaignCount->where("gender", "=", $data['gender']);
+	}
+
+	if (!empty($data['reach_max'])) {
+		$campaign = $campaign->where("reach_num", "<", $data['reach_max']);
+		$campaignCount = $campaignCount->where("reach_num", "<", $data['reach_max']);
+	}
+
+	if (!empty($data['rate_max'])) {
+		$campaign = $campaign->where("rate", "<", $data['rate_max']);
+		$campaignCount = $campaignCount->where("rate", "<", $data['rate_max']);
+	}
+
+	if (empty($data['tags']) && empty($data['search'])) {
+		$campaign = \Influencer::take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC")->get();
+		$campaignCount = \Influencer::count();
+	} else {
+		$campaign = $campaign->get();
+		$campaignCount = $campaignCount->count();
+	}
+
+	$resp['data']['data'] = $campaign->toArray();
+	$resp['data']['token'] = genToken($userid);
+	$resp['data']['count'] = $campaignCount;
+	if ($page_size * $page < $campaignCount) {
+		$resp['data']['next'] = '/v1/influencer/list?page_size=' . $page_size . '&page=' . ($page + 1); 
+	} else {
+		$resp['data']['next'] = null;
+	}
+	if ($page > 1) {
+		$resp['data']['prev'] = '/v1/influencer/list?page_size=' . $page_size . '&page=' . ($page - 1); 
+	} else {
+		$resp['data']['prev'] = null; 
+	}
+
+
 	end:
     $response->getBody()->write(json_encode($resp));
 
