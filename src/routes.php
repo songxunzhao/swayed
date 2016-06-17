@@ -227,7 +227,7 @@ $app->post('/v1/images', function ($request, $response, $args) {
     return $response;
 });
 
-$app->post('/v1/campaign', function ($request, $response, $args) {
+$app->post('/v1/campaigns', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
 	$user = \User::where("uuid", "=", $userid)->first();
 
@@ -369,7 +369,7 @@ $app->post('/v1/contact_requests', function ($request, $response, $args) {
 
 
 
-$app->put('/v1/campaign/ca{camid}', function ($request, $response, $args) {
+$app->put('/v1/campaigns/ca{camid}', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
 	$camid = 'ca'.($request->getAttribute("camid"));
 	$user = \User::where("uuid", "=", $userid)->first();
@@ -453,7 +453,7 @@ $app->put('/v1/campaign/ca{camid}', function ($request, $response, $args) {
 });
 
 
-$app->get('/v1/campaign/{camid}', function ($request, $response, $args) {
+$app->get('/v1/campaigns/{camid}', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
 	$camid = ($request->getAttribute("camid"));
 	$user = \User::where("uuid", "=", $userid)->first();
@@ -488,7 +488,7 @@ $app->get('/v1/campaign/{camid}', function ($request, $response, $args) {
     return $response;
 });
 
-$app->post('/v1/campaign/list', function ($request, $response, $args) {
+$app->post('/v1/campaigns/list', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
 	$user = \User::where("uuid", "=", $userid)->first();
 
@@ -562,7 +562,7 @@ $app->post('/v1/campaign/list', function ($request, $response, $args) {
     return $response;
 });
 
-$app->get('/v1/brand/campaign', function ($request, $response, $args) {
+$app->get('/v1/brand/campaigns', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
 	$user = \User::where("uuid", "=", $userid)->first();
 
@@ -773,7 +773,7 @@ $app->post('/v1/user/interests', function ($request, $response, $args) {
     return $response;
 });
 
-$app->get('/v1/interest_tag', function ($request, $response, $args) {
+$app->get('/v1/interest_tags', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
 
 	$resp = array();
@@ -793,7 +793,7 @@ $app->get('/v1/interest_tag', function ($request, $response, $args) {
     return $response;
 });
 
-$app->post('/v1/campaign/{camid}/apply', function ($request, $response, $args) {
+$app->post('/v1/campaigns/{camid}/apply', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
 	$camid = ($request->getAttribute("camid"));
 
@@ -838,7 +838,7 @@ $app->post('/v1/campaign/{camid}/apply', function ($request, $response, $args) {
     return $response;
 });
 
-$app->post('/v1/campaign/{camid}/influencer/{influid}/offer', function ($request, $response, $args) {
+$app->post('/v1/campaigns/{camid}/influencers/{influid}/offer', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
 	$camid = ($request->getAttribute("camid"));
 	$influid = ($request->getAttribute("influid"));
@@ -885,7 +885,7 @@ $app->post('/v1/campaign/{camid}/influencer/{influid}/offer', function ($request
 });
 
 
-$app->get('/v1/campaign/{camid}/influencer/list', function ($request, $response, $args) {
+$app->get('/v1/campaigns/{camid}/influencers', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
 	$camid = ($request->getAttribute("camid"));
 
@@ -917,7 +917,7 @@ $app->get('/v1/campaign/{camid}/influencer/list', function ($request, $response,
     return $response;
 });
 
-$app->get('/v1/campaign/{camid}/close', function ($request, $response, $args) {
+$app->get('/v1/campaigns/{camid}/close', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
 	$camid = ($request->getAttribute("camid"));
 
@@ -951,7 +951,7 @@ $app->get('/v1/campaign/{camid}/close', function ($request, $response, $args) {
 });
 
 
-$app->post('/v1/influencer/list', function ($request, $response, $args) {
+$app->post('/v1/influencers/list', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
 	$user = \User::where("uuid", "=", $userid)->first();
 
