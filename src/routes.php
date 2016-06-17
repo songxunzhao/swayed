@@ -541,7 +541,7 @@ $app->post('/v1/campaigns/list', function ($request, $response, $args) {
 	}
 	
 	
-	$resp['data']['data'] = $campaign->toArray();
+	$resp['data']['results'] = $campaign->toArray();
 	$resp['data']['token'] = genToken($userid);
 	$resp['data']['count'] = $campaignCount;
 	if ($page_size * $page < $campaignCount) {
@@ -596,7 +596,7 @@ $app->get('/v1/brand/campaigns', function ($request, $response, $args) {
 		$cam->detail_images = json_decode($cam->detail_images, true);
 	}
 	
-	$resp['data']['data'] = $campaign->toArray();
+	$resp['data']['results'] = $campaign->toArray();
 	$resp['data']['token'] = genToken($userid);
 	$resp['data']['count'] = $campaignCount;
 	if ($page_size * $page < $campaignCount) {
@@ -1002,7 +1002,7 @@ $app->post('/v1/influencers/list', function ($request, $response, $args) {
 		$campaignCount = $campaignCount->count();
 	}
 
-	$resp['data']['data'] = $campaign->toArray();
+	$resp['data']['results'] = $campaign->toArray();
 	$resp['data']['token'] = genToken($userid);
 	$resp['data']['count'] = $campaignCount;
 	if ($page_size * $page < $campaignCount) {
@@ -1045,7 +1045,7 @@ $app->get('/v1/faqs', function ($request, $response, $args) {
 	$campaign = $campaign->get();
 	$campaignCount = $campaignCount->count();
 
-	$resp['data']['data'] = $campaign->toArray();
+	$resp['data']['results'] = $campaign->toArray();
 	$resp['data']['token'] = genToken($userid);
 	$resp['data']['count'] = $campaignCount;
 	if ($page_size * $page < $campaignCount) {
