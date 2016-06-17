@@ -42,7 +42,7 @@ function validateToken($token) {
 //middleware
 $app->add(function ($request, $response, $next) {
 	$reqPath = $request->getUri()->getPath();
-	if ($reqPath == 'v1/user/login' || $reqPath == 'v1/user/signup') {
+	if ($reqPath == 'v1/user/login' || $reqPath == 'v1/user/signup' || $reqPath == 'v1/contact_requests') {
 		$response = $next($request, $response);
 	} else {
 		//validate token
@@ -290,8 +290,86 @@ $app->post('/v1/campaign', function ($request, $response, $args) {
     return $response;
 });
 
+$app->get('/v1/contact_requests/{reqid}', function ($request, $response, $args) {
+	$userid = $request->getAttribute('userid');
+	$reqid = ($request->getAttribute("reqid"));
 
-$app->post('/v1/campaign/ca{camid}', function ($request, $response, $args) {
+	$user = \User::where("uuid", "=", $userid)->first();
+
+	$resp = array();
+	$resp['error'] = "";
+	$resp['code'] = 200;
+	$resp['data'] = "";
+
+	if (empty($reqid)) {
+		$resp['error'] = "Some fields are missing or wrong";
+		$resp['code'] = 400;
+		goto end;
+	}
+
+	$campaign = \ContactRequest::where('uuid', '=', $reqid)->first();
+	if ($campaign == null) {
+		$resp['error'] = "Contact request not found";
+		$resp['code'] = 404;
+		goto end;
+	}
+	
+	
+	$resp['data'] = $campaign->toArray();
+
+	end:
+    $response->getBody()->write(json_encode($resp));
+
+    return $response;
+});
+
+
+$app->post('/v1/contact_requests', function ($request, $response, $args) {
+	$userid = $request->getAttribute('userid');
+	$user = \User::where("uuid", "=", $userid)->first();
+
+	$data = $request->getParsedBody();
+	$first_name = $data['first_name'];
+	$last_name = $data['last_name'];
+	$email = $data['email'];
+	$phone = $data['phone'];
+	$message = $data['message'];
+
+
+	$resp = array();
+	$resp['error'] = "";
+	$resp['code'] = 200;
+	$resp['data'] = "";
+
+	if (empty($first_name) || empty($last_name) || empty($email) || empty($phone) || empty($message)) {
+		$resp['error'] = "Some fields are missing or wrong";
+		$resp['code'] = 400;
+		goto end;
+	}
+
+	$campaign = new \ContactRequest;
+	$campaign->first_name = $first_name;
+	$campaign->last_name = $last_name;
+	$campaign->email = $email;
+	$campaign->phone = $phone;
+	$campaign->message = $message;
+	$campaign->status = 'open';
+	$campaign->uuid = uniqid();
+	$campaign->save();
+	
+	$resp['data'] = array();;
+	$resp['data']['message_id'] = $campaign->uuid;
+	$resp['data']['message'] = 'Contact request was sent. Our operator will contact you shortly';
+
+	end:
+    $response->getBody()->write(json_encode($resp));
+
+    return $response;
+});
+
+
+
+$app->put('/v1/campaign/ca{camid}', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
 	$camid = 'ca'.($request->getAttribute("camid"));
 	$user = \User::where("uuid", "=", $userid)->first();
@@ -463,7 +541,7 @@ $app->post('/v1/campaign/list', function ($request, $response, $args) {
 	}
 	
 	
-	$resp['data']['results'] = $campaign->toArray();
+	$resp['data']['data'] = $campaign->toArray();
 	$resp['data']['token'] = genToken($userid);
 	$resp['data']['count'] = $campaignCount;
 	if ($page_size * $page < $campaignCount) {
@@ -518,7 +596,7 @@ $app->get('/v1/brand/campaign', function ($request, $response, $args) {
 		$cam->detail_images = json_decode($cam->detail_images, true);
 	}
 	
-	$resp['data']['results'] = $campaign->toArray();
+	$resp['data']['data'] = $campaign->toArray();
 	$resp['data']['token'] = genToken($userid);
 	$resp['data']['count'] = $campaignCount;
 	if ($page_size * $page < $campaignCount) {
@@ -748,7 +826,7 @@ $app->post('/v1/campaign/{camid}/apply', function ($request, $response, $args) {
 		$campaignContract->uuid = uniqid();
 		$campaignContract->campaign_id = $camid;
 		$campaignContract->influencer_id = $userid;
-		$campaignContract->status = "applied";
+		$campaignContract->status = 2;
 		$campaignContract->save();
 	}
 	
@@ -839,6 +917,39 @@ $app->get('/v1/campaign/{camid}/influencer/list', function ($request, $response,
     return $response;
 });
 
+$app->get('/v1/campaign/{camid}/close', function ($request, $response, $args) {
+	$userid = $request->getAttribute('userid');
+	$camid = ($request->getAttribute("camid"));
+
+	$resp = array();
+	$resp['error'] = "";
+	$resp['code'] = 200;
+	$resp['data'] = "";
+
+	if (empty($camid)) {
+		$resp['error'] = "Some fields are missing or wrong";
+		$resp['code'] = 400;
+		goto end;
+	}
+
+	$user = \User::where("uuid", "=", $userid)->first();
+	$campaign = \Campaign::where("uuid", "=", $camid)->first();
+	if ($campaign->brand_id != $user->uuid) {
+		$resp['error'] = "Permission denied to close this campaign";
+		$resp['code'] = 400;
+		goto end;
+	}
+
+	$campaign->status = 3;
+	$campaign->save();
+
+	$resp['message'] = 'Campaign was successfully closed';
+	end:
+    $response->getBody()->write(json_encode($resp));
+
+    return $response;
+});
+
 
 $app->post('/v1/influencer/list', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
@@ -891,7 +1002,7 @@ $app->post('/v1/influencer/list', function ($request, $response, $args) {
 		$campaignCount = $campaignCount->count();
 	}
 
-	$resp['data']['results'] = $campaign->toArray();
+	$resp['data']['data'] = $campaign->toArray();
 	$resp['data']['token'] = genToken($userid);
 	$resp['data']['count'] = $campaignCount;
 	if ($page_size * $page < $campaignCount) {
@@ -901,6 +1012,49 @@ $app->post('/v1/influencer/list', function ($request, $response, $args) {
 	}
 	if ($page > 1) {
 		$resp['data']['prev'] = '/v1/influencer/list?page_size=' . $page_size . '&page=' . ($page - 1); 
+	} else {
+		$resp['data']['prev'] = null; 
+	}
+
+
+	end:
+    $response->getBody()->write(json_encode($resp));
+
+    return $response;
+});
+
+
+
+$app->get('/v1/faqs', function ($request, $response, $args) {
+	$userid = $request->getAttribute('userid');
+	$user = \User::where("uuid", "=", $userid)->first();
+
+	$page_size = isset($_GET['page_size']) ? $_GET['page_size'] : 20;
+	$page = isset($_GET['page']) ? $_GET['page'] : 1;
+
+	$data = $request->getParsedBody();
+
+	$resp = array();
+	$resp['error'] = "";
+	$resp['code'] = 200;
+	$resp['data'] = "";
+
+
+	$campaign = \Faq::take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC");
+	$campaignCount = \Faq::orderBy("created_at", "DESC");
+	$campaign = $campaign->get();
+	$campaignCount = $campaignCount->count();
+
+	$resp['data']['data'] = $campaign->toArray();
+	$resp['data']['token'] = genToken($userid);
+	$resp['data']['count'] = $campaignCount;
+	if ($page_size * $page < $campaignCount) {
+		$resp['data']['next'] = '/v1/faqs?page_size=' . $page_size . '&page=' . ($page + 1); 
+	} else {
+		$resp['data']['next'] = null;
+	}
+	if ($page > 1) {
+		$resp['data']['prev'] = '/v1/faqs?page_size=' . $page_size . '&page=' . ($page - 1); 
 	} else {
 		$resp['data']['prev'] = null; 
 	}

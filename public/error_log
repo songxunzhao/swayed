@@ -26,3 +26,6 @@
 [08-Jun-2016 15:57:13 UTC] PHP Parse error:  syntax error, unexpected '->' (T_OBJECT_OPERATOR) in /home/webdev/public_html/swayed/src/routes.php on line 449
 [14-Jun-2016 05:21:39 UTC] PHP Catchable fatal error:  Argument 1 passed to Illuminate\Database\Grammar::parameterize() must be of the type array, string given, called in /home/webdev/public_html/swayed/vendor/illuminate/database/Query/Grammars/Grammar.php on line 362 and defined in /home/webdev/public_html/swayed/vendor/illuminate/database/Grammar.php on line 118
 [14-Jun-2016 10:52:40 UTC] PHP Parse error:  syntax error, unexpected end of file in /home/webdev/public_html/swayed/src/routes.php on line 502
+[15-Jun-2016 16:00:24 UTC] PHP Fatal error:  Cannot redeclare class Token in /home/webdev/public_html/swayed/app/models/Token.php on line 12
+[15-Jun-2016 16:00:36 UTC] PHP Fatal error:  Cannot redeclare class Token in /home/webdev/public_html/swayed/app/models/Token.php on line 12
+[16-Jun-2016 10:20:10 UTC] PHP Fatal error:  Call to a member function toArray() on null in /home/webdev/public_html/swayed/src/routes.php on line 174
