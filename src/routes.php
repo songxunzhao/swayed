@@ -218,7 +218,7 @@ $app->post('/v1/images', function ($request, $response, $args) {
 	}
 
 	$resp['data'] = array();
-	$resp['data']['token'] = genToken($userid);
+	
 	$resp['data']['url'] = BASEURL . "/upload/$newFileName";
 
 	end:
@@ -282,7 +282,7 @@ $app->post('/v1/campaigns', function ($request, $response, $args) {
 	$resp['data'] = $campaign->toArray();
 	$resp['data']['detail_images'] = json_decode($campaign->detail_images, true);
 	$resp['data']['required_tags'] = $required_tags;
-	$resp['data']['token'] = genToken($userid);
+	
 
 	end:
     $response->getBody()->write(json_encode($resp));
@@ -444,7 +444,7 @@ $app->put('/v1/campaigns/ca{camid}', function ($request, $response, $args) {
 	$resp['data'] = $campaign->toArray();
 	$resp['data']['detail_images'] = json_decode($campaign->detail_images, true);
 	$resp['data']['required_tags'] =$required_tags;
-	$resp['data']['token'] = genToken($userid);
+	
 
 	end:
     $response->getBody()->write(json_encode($resp));
@@ -480,7 +480,6 @@ $app->get('/v1/campaigns/{camid}', function ($request, $response, $args) {
 	$resp['data'] = $campaign->toArray();
 	$resp['data']['detail_images'] = json_decode($campaign->detail_images, true);
 	$resp['data']['required_tags'] = $required_tags;
-	$resp['data']['token'] = genToken($userid);
 
 	end:
     $response->getBody()->write(json_encode($resp));
@@ -503,8 +502,8 @@ $app->post('/v1/campaigns/list', function ($request, $response, $args) {
 	$resp['data'] = "";
 
 
-	$campaign = \Campaign::take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC");
-	$campaignCount = \Campaign::orderBy("created_at", "DESC");
+	$campaign = \Campaign::take($page_size)->where('status', '<>', 3)->skip($page_size*($page - 1))->orderBy("created_at", "DESC");
+	$campaignCount = \Campaign::where('status', '<>', 3)->orderBy("created_at", "DESC");
 
 	if (!empty($data['tags'])) {
 		$tag = \CampaignTag::whereIn("tag", $data['tags'])->get();
@@ -522,8 +521,8 @@ $app->post('/v1/campaigns/list', function ($request, $response, $args) {
 	}
 
 	if (empty($data['tags']) && empty($data['search'])) {
-		$campaign = \Campaign::take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC")->get();
-		$campaignCount = \Campaign::count();
+		$campaign = \Campaign::where('status', '<>', 3)->take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC")->get();
+		$campaignCount = \Campaign::where('status', '<>', 3)->count();
 	} else {
 		$campaign = $campaign->get();
 		$campaignCount = $campaignCount->count();
@@ -542,7 +541,6 @@ $app->post('/v1/campaigns/list', function ($request, $response, $args) {
 	
 	
 	$resp['data']['results'] = $campaign->toArray();
-	$resp['data']['token'] = genToken($userid);
 	$resp['data']['count'] = $campaignCount;
 	if ($page_size * $page < $campaignCount) {
 		$resp['data']['next'] = '/v1/campaign/list?page_size=' . $page_size . '&page=' . ($page + 1); 
@@ -597,7 +595,6 @@ $app->get('/v1/brand/campaigns', function ($request, $response, $args) {
 	}
 	
 	$resp['data']['results'] = $campaign->toArray();
-	$resp['data']['token'] = genToken($userid);
 	$resp['data']['count'] = $campaignCount;
 	if ($page_size * $page < $campaignCount) {
 		$resp['data']['next'] = '/v1/campaign/list?page_size=' . $page_size . '&page=' . ($page + 1); 
@@ -626,6 +623,7 @@ $app->post('/v1/user/profile/', function ($request, $response, $args) {
 	$social_token = $data['social_token'];
 	$description = $data['description'];
 	$website = $data['website'];
+	$reach_num = $data['reach_num'];
 
 	$gender = $data['gender'];
 	$country = $data['country'];
@@ -686,12 +684,15 @@ $app->post('/v1/user/profile/', function ($request, $response, $args) {
 		if (!empty($gender)) {
 			$profile2->gender = $gender;
 		}
+		if (!empty($reach_num)) {
+			$profile2->reach_num = $reach_num;
+		}
 		$profile2->save();
 		$resp['data'] = $profile2->toArray();
 	}
 	
 	$resp['data']['name'] = $user->name;
-	$resp['data']['token'] = genToken($userid);
+	
 
 	end:
     $response->getBody()->write(json_encode($resp));
@@ -959,15 +960,14 @@ $app->post('/v1/influencers/list', function ($request, $response, $args) {
 	$page = isset($_GET['page']) ? $_GET['page'] : 1;
 
 	$data = $request->getParsedBody();
-
 	$resp = array();
 	$resp['error'] = "";
 	$resp['code'] = 200;
 	$resp['data'] = "";
 
 
-	$campaign = \Influencer::take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC");
-	$campaignCount = \Influencer::orderBy("created_at", "DESC");
+	$influencer = \Influencer::take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC");
+	$influencerCount = \Influencer::orderBy("created_at", "DESC");
 
 	if (!empty($data['tags'])) {
 		$tag = \UserInterest::whereIn("tag", $data['tags'])->get();
@@ -975,37 +975,37 @@ $app->post('/v1/influencers/list', function ($request, $response, $args) {
 		foreach ($tag as $t) {
 			$uuid[] = $t->user_id;
 		}
-		$campaign = $campaign->whereIn("user_id", $uuid);
-		$campaignCount = $campaignCount->whereIn("user_id", $uuid);
+		$influencer = $influencer->whereIn("user_id", $uuid);
+		$influencerCount = $influencerCount->whereIn("user_id", $uuid);
 	}
 
 	if (!empty($data['gender'])) {
-		$campaign = $campaign->where("gender", "=", $data['gender']);
-		$campaignCount = $campaignCount->where("gender", "=", $data['gender']);
+		$influencer = $influencer->where("gender", "=", $data['gender']);
+		$influencerCount = $influencerCount->where("gender", "=", $data['gender']);
 	}
 
 	if (!empty($data['reach_max'])) {
-		$campaign = $campaign->where("reach_num", "<", $data['reach_max']);
-		$campaignCount = $campaignCount->where("reach_num", "<", $data['reach_max']);
+		$influencer = $influencer->where("reach_num", "<", $data['reach_max']);
+		$influencerCount = $influencerCount->where("reach_num", "<", $data['reach_max']);
 	}
 
 	if (!empty($data['rate_max'])) {
-		$campaign = $campaign->where("rate", "<", $data['rate_max']);
-		$campaignCount = $campaignCount->where("rate", "<", $data['rate_max']);
+		$influencer = $influencer->where("rate", "<", $data['rate_max']);
+		$influencerCount = $influencerCount->where("rate", "<", $data['rate_max']);
 	}
 
-	if (empty($data['tags']) && empty($data['search'])) {
-		$campaign = \Influencer::take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC")->get();
-		$campaignCount = \Influencer::count();
+	if (empty($data['tags']) && empty($data['gender']) && empty($data['reach_max']) && empty($data['rate_max'])) {
+		$influencer = \Influencer::take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC")->get();
+		$influencerCount = \Influencer::count();
 	} else {
-		$campaign = $campaign->get();
-		$campaignCount = $campaignCount->count();
+		$influencer = $influencer->get();
+		$influencerCount = $influencerCount->count();
 	}
 
-	$resp['data']['results'] = $campaign->toArray();
-	$resp['data']['token'] = genToken($userid);
-	$resp['data']['count'] = $campaignCount;
-	if ($page_size * $page < $campaignCount) {
+	$resp['data']['results'] = $influencer->toArray();
+	
+	$resp['data']['count'] = $influencerCount;
+	if ($page_size * $page < $influencerCount) {
 		$resp['data']['next'] = '/v1/influencer/list?page_size=' . $page_size . '&page=' . ($page + 1); 
 	} else {
 		$resp['data']['next'] = null;
@@ -1046,7 +1046,7 @@ $app->get('/v1/faqs', function ($request, $response, $args) {
 	$campaignCount = $campaignCount->count();
 
 	$resp['data']['results'] = $campaign->toArray();
-	$resp['data']['token'] = genToken($userid);
+	
 	$resp['data']['count'] = $campaignCount;
 	if ($page_size * $page < $campaignCount) {
 		$resp['data']['next'] = '/v1/faqs?page_size=' . $page_size . '&page=' . ($page + 1); 
