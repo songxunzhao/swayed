@@ -746,6 +746,11 @@ $app->post('/v1/user/interests', function ($request, $response, $args) {
 	$resp['code'] = 200;
 	$resp['data'] = "";
 
+	if(!array_key_exists('tags', $data))
+		$data = [];
+	else
+		$data = $data['tags'];
+	
 	if (empty($data)) {
 		$resp['error'] = "Some fields are missing or wrong";
 		$resp['code'] = 400;
