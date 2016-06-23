@@ -173,7 +173,7 @@ $app->post('/v1/user/login', function ($request, $response, $args) {
 
 	$resp['data'] = array();
 	$resp['data']['token'] =  genToken($user->uuid);
-	$resp['data']['profile'] = $profile->toProfileArray();
+	$resp['data']['profile'] = $user->toProfileArray();
 
 	$tags = UserInterest::where("user_id", "=", $user->uuid)->get();
 	$tagName = array();
