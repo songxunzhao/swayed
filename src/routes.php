@@ -10,7 +10,7 @@ use Model\InterestTag;
 use Model\Token;
 use Model\User;
 use Model\UserInterest;
-use Illuminate\Pagination;
+use Illuminate\Pagination\Paginator;
 
 //test 
 //function
