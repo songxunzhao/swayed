@@ -1,5 +1,5 @@
 <?php 
-
+namespace Model;
 class Token extends \Illuminate\Database\Eloquent\Model
 {
 

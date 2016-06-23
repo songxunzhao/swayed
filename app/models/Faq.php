@@ -1,5 +1,5 @@
 <?php 
-
+namespace Model;
 class Faq extends \Illuminate\Database\Eloquent\Model
 {
 

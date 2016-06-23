@@ -1,5 +1,5 @@
 <?php 
-
+namespace Model;
 class Influencer extends \Illuminate\Database\Eloquent\Model
 {
 

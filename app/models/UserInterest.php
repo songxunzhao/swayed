@@ -1,5 +1,5 @@
 <?php 
-
+namespace Model;
 class UserInterest extends \Illuminate\Database\Eloquent\Model
 {
 

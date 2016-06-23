@@ -1,5 +1,5 @@
 <?php 
-
+namespace Model;
 class ContactRequest extends \Illuminate\Database\Eloquent\Model
 {
 

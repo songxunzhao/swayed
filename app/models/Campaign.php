@@ -1,5 +1,5 @@
 <?php 
-
+namespace Model;
 class Campaign extends \Illuminate\Database\Eloquent\Model
 {
 

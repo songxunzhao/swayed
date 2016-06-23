@@ -1,4 +1,15 @@
 <?php
+use Model\Brand;
+use Model\Campaign;
+use Model\CampaignContract;
+use Model\CampaignTag;
+use Model\ContactRequest;
+use Model\Faq;
+use Model\Influencer;
+use Model\InterestTag;
+use Model\Token;
+use Model\User;
+use Model\UserInterest;
 
 //test 
 //function
@@ -39,7 +50,7 @@ function validateToken($token) {
 	}
 }
 
-//middleware
+//Middleware
 $app->add(function ($request, $response, $next) {
 	$reqPath = $request->getUri()->getPath();
 	if ($reqPath == 'v1/user/login' || $reqPath == 'v1/user/signup' || $reqPath == 'v1/contact_requests') {
@@ -74,7 +85,7 @@ $app->post('/v1/user/signup', function ($request, $response, $args) {
 	$resp['error'] = "";
 	$resp['code'] = 200;
 	$resp['data'] = "";
-	//valiate
+	//Validate
 	if (empty($password) || empty($email) || empty($user_type)) {
 		$resp['error'] = "Some fields are missing or wrong"; 
 		$resp['code'] = 400;
@@ -97,7 +108,7 @@ $app->post('/v1/user/signup', function ($request, $response, $args) {
 	}
 
 	//signup
-	$user = new \User;
+	$user = new User;
 	$user->email = $email;
     $user->name = '';
 	$user->password = md5($password);
@@ -106,22 +117,18 @@ $app->post('/v1/user/signup', function ($request, $response, $args) {
 	$user->save();
 
 	if ($user_type == "brand") {
-		$profile = new \Brand;
-		$profile->user_id = $user->uuid;
-		$profile->save();
+		$brand = new \Brand;
+		$brand->user_id = $user->uuid;
+		$brand->save();
 	} else {
-		$profile = new \Influencer;
-		$profile->user_id = $user->uuid;
-		$profile->save();
+		$influencer = new \Influencer;
+		$influencer->user_id = $user->uuid;
+		$influencer->save();
 	}
 
 	$resp['data'] = array();
 	$resp['data']['token'] =  genToken($user->uuid);
-	$resp['data']['profile'] = array();
-	$resp['data']['profile'] = $profile->toArray();
-	$resp['data']['profile']['email'] = $email;
-	$resp['data']['profile']['user_type'] = $user_type;
-
+	$resp['data']['profile'] = $user->toProfileArray();
 
 	end:
     $response->getBody()->write(json_encode($resp));
@@ -163,18 +170,10 @@ $app->post('/v1/user/login', function ($request, $response, $args) {
 		}
 	}
 
-	if ($user->user_type == "brand") {
-		$profile = \Brand::where("user_id", "=", $user->uuid)->first();
-	} else {
-		$profile = \Influencer::where("user_id", "=", $user->uuid)->first();
-	}
 
 	$resp['data'] = array();
 	$resp['data']['token'] =  genToken($user->uuid);
-	$resp['data']['profile'] = $profile->toArray();
-	$resp['data']['profile']['email'] = $user->email;
-	$resp['data']['profile']['name'] = $user->name;
-	$resp['data']['profile']['user_type'] = $user->user_type;
+	$resp['data']['profile'] = $profile->toProfileArray();
 
 	$tags = \UserInterest::where("user_id", "=", $user->uuid)->get();
 	$tagName = array();
@@ -229,7 +228,7 @@ $app->post('/v1/images', function ($request, $response, $args) {
 
 $app->post('/v1/campaigns', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
-	$user = \User::where("uuid", "=", $userid)->first();
+	$user = User::where("uuid", "=", $userid)->first();
 
 	$data = $request->getParsedBody();
 	$main_image = $data['main_image'];
@@ -257,7 +256,7 @@ $app->post('/v1/campaigns', function ($request, $response, $args) {
 		goto end;
 	}
 
-	$campaign = new \Campaign;
+	$campaign = new Campaign;
 	$campaign->main_image = $main_image;
 	$campaign->objective = $objective;
 	$campaign->allow_action = $allow_action;
@@ -271,7 +270,7 @@ $app->post('/v1/campaigns', function ($request, $response, $args) {
 
 	if (!empty($required_tags)) {
 		for ($i = 0; $i < count($required_tags); $i ++) {
-			$tag = new \CampaignTag;
+			$tag = new CampaignTag;
 			$tag->uuid = uniqid();
 			$tag->campaign_id = $campaign->uuid;
 			$tag->tag = $required_tags[$i];
@@ -294,7 +293,7 @@ $app->get('/v1/contact_requests/{reqid}', function ($request, $response, $args) 
 	$userid = $request->getAttribute('userid');
 	$reqid = ($request->getAttribute("reqid"));
 
-	$user = \User::where("uuid", "=", $userid)->first();
+	$user = User::where("uuid", "=", $userid)->first();
 
 	$resp = array();
 	$resp['error'] = "";
@@ -307,7 +306,7 @@ $app->get('/v1/contact_requests/{reqid}', function ($request, $response, $args) 
 		goto end;
 	}
 
-	$campaign = \ContactRequest::where('uuid', '=', $reqid)->first();
+	$campaign = ContactRequest::where('uuid', '=', $reqid)->first();
 	if ($campaign == null) {
 		$resp['error'] = "Contact request not found";
 		$resp['code'] = 404;
@@ -326,7 +325,7 @@ $app->get('/v1/contact_requests/{reqid}', function ($request, $response, $args) 
 
 $app->post('/v1/contact_requests', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
-	$user = \User::where("uuid", "=", $userid)->first();
+	$user = User::where("uuid", "=", $userid)->first();
 
 	$data = $request->getParsedBody();
 	$first_name = $data['first_name'];
@@ -347,7 +346,7 @@ $app->post('/v1/contact_requests', function ($request, $response, $args) {
 		goto end;
 	}
 
-	$campaign = new \ContactRequest;
+	$campaign = new ContactRequest;
 	$campaign->first_name = $first_name;
 	$campaign->last_name = $last_name;
 	$campaign->email = $email;
@@ -372,7 +371,7 @@ $app->post('/v1/contact_requests', function ($request, $response, $args) {
 $app->put('/v1/campaigns/ca{camid}', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
 	$camid = 'ca'.($request->getAttribute("camid"));
-	$user = \User::where("uuid", "=", $userid)->first();
+	$user = User::where("uuid", "=", $userid)->first();
 
 	$data = $request->getParsedBody();
 	$main_image = $data['main_image'];
@@ -400,7 +399,7 @@ $app->put('/v1/campaigns/ca{camid}', function ($request, $response, $args) {
 		$resp['code'] = 400;
 		goto end;
 	}
-	$campaign = \Campaign::where("uuid", "=", $camid)->first();
+	$campaign = Campaign::where("uuid", "=", $camid)->first();
 	if ($campaign == null) { 
 		$resp['error'] = "Campaign not found";
 		$resp['code'] = 404;
@@ -430,9 +429,9 @@ $app->put('/v1/campaigns/ca{camid}', function ($request, $response, $args) {
 		$campaign->detail_images = json_encode($detail_images);
 	}
 	if (!empty($required_tags)) {
-		\CampaignTag::where("campaign_id", "=", $camid)->delete();
+		CampaignTag::where("campaign_id", "=", $camid)->delete();
 		for ($i = 0; $i < count($required_tags); $i ++) {
-			$tag = new \CampaignTag;
+			$tag = new CampaignTag;
 			$tag->uuid = uniqid();
 			$tag->campaign_id = $campaign->uuid;
 			$tag->tag = $required_tags[$i];
@@ -456,7 +455,7 @@ $app->put('/v1/campaigns/ca{camid}', function ($request, $response, $args) {
 $app->get('/v1/campaigns/{camid}', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
 	$camid = ($request->getAttribute("camid"));
-	$user = \User::where("uuid", "=", $userid)->first();
+	$user = User::where("uuid", "=", $userid)->first();
 
 	$resp = array();
 	$resp['error'] = "";
@@ -464,14 +463,14 @@ $app->get('/v1/campaigns/{camid}', function ($request, $response, $args) {
 	$resp['data'] = "";
 
 
-	$campaign = \Campaign::where("uuid", "=", $camid)->first();
+	$campaign = Campaign::where("uuid", "=", $camid)->first();
 	if ($campaign == null) { 
 		$resp['error'] = "Campaign not found";
 		$resp['code'] = 404;
 		goto end;
 	}
 
-	$campainTag = \CampaignTag::where("campaign_id", "=", $camid)->get();
+	$campainTag = CampaignTag::where("campaign_id", "=", $camid)->get();
 	$required_tags = array();
 	foreach ($campainTag as $item) { 
 		$required_tags[] = $item->tag;
@@ -489,7 +488,7 @@ $app->get('/v1/campaigns/{camid}', function ($request, $response, $args) {
 
 $app->post('/v1/campaigns/list', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
-	$user = \User::where("uuid", "=", $userid)->first();
+	$user = User::where("uuid", "=", $userid)->first();
 
 	$page_size = isset($_GET['page_size']) ? $_GET['page_size'] : 20;
 	$page = isset($_GET['page']) ? $_GET['page'] : 1;
@@ -502,11 +501,11 @@ $app->post('/v1/campaigns/list', function ($request, $response, $args) {
 	$resp['data'] = "";
 
 
-	$campaign = \Campaign::take($page_size)->where('status', '<>', 3)->skip($page_size*($page - 1))->orderBy("created_at", "DESC");
-	$campaignCount = \Campaign::where('status', '<>', 3)->orderBy("created_at", "DESC");
+	$campaign = Campaign::take($page_size)->where('status', '<>', 3)->skip($page_size*($page - 1))->orderBy("created_at", "DESC");
+	$campaignCount = Campaign::where('status', '<>', 3)->orderBy("created_at", "DESC");
 
 	if (!empty($data['tags'])) {
-		$tag = \CampaignTag::whereIn("tag", $data['tags'])->get();
+		$tag = CampaignTag::whereIn("tag", $data['tags'])->get();
 		$uuid = array();
 		foreach ($tag as $t) {
 			$uuid[] = $t->campaign_id;
@@ -521,8 +520,8 @@ $app->post('/v1/campaigns/list', function ($request, $response, $args) {
 	}
 
 	if (empty($data['tags']) && empty($data['search'])) {
-		$campaign = \Campaign::where('status', '<>', 3)->take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC")->get();
-		$campaignCount = \Campaign::where('status', '<>', 3)->count();
+		$campaign = Campaign::where('status', '<>', 3)->take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC")->get();
+		$campaignCount = Campaign::where('status', '<>', 3)->count();
 	} else {
 		$campaign = $campaign->get();
 		$campaignCount = $campaignCount->count();
@@ -531,7 +530,7 @@ $app->post('/v1/campaigns/list', function ($request, $response, $args) {
 	foreach ($campaign as &$cam) {
 		$cam->detail_images = json_decode($cam->detail_images, true);
 
-		$campainTag = \CampaignTag::where("campaign_id", "=", $cam->uuid)->get();
+		$campainTag = CampaignTag::where("campaign_id", "=", $cam->uuid)->get();
 		$required_tags = array();
 		foreach ($campainTag as $item) { 
 			$required_tags[] = $item->tag;
@@ -562,7 +561,7 @@ $app->post('/v1/campaigns/list', function ($request, $response, $args) {
 
 $app->get('/v1/brand/campaigns', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
-	$user = \User::where("uuid", "=", $userid)->first();
+	$user = User::where("uuid", "=", $userid)->first();
 
 	$page_size = isset($_GET['page_size']) ? $_GET['page_size'] : 20;
 	$page = isset($_GET['page']) ? $_GET['page'] : 1;
@@ -582,12 +581,12 @@ $app->get('/v1/brand/campaigns', function ($request, $response, $args) {
 		goto end;
 	}
 	if ($status > 0) {
-		$campaign = \Campaign::where("brand_id", "=", $userid)->where("status", "=", $status)->take($page_size)->skip($page_size*($page - 1))->orderBy("status", "ASC")->orderBy("created_at", "DESC")->get();
-		$campaignCount = \Campaign::where("brand_id", "=", $userid)->where("status", "=", $status)->count();
+		$campaign = Campaign::where("brand_id", "=", $userid)->where("status", "=", $status)->take($page_size)->skip($page_size*($page - 1))->orderBy("status", "ASC")->orderBy("created_at", "DESC")->get();
+		$campaignCount = Campaign::where("brand_id", "=", $userid)->where("status", "=", $status)->count();
 
 	} else {
-		$campaign = \Campaign::where("brand_id", "=", $userid)->take($page_size)->skip($page_size*($page - 1))->orderBy("status", "ASC")->orderBy("created_at", "DESC")->get();
-		$campaignCount = \Campaign::where("brand_id", "=", $userid)->count();
+		$campaign = Campaign::where("brand_id", "=", $userid)->take($page_size)->skip($page_size*($page - 1))->orderBy("status", "ASC")->orderBy("created_at", "DESC")->get();
+		$campaignCount = Campaign::where("brand_id", "=", $userid)->count();
 	}
 
 	foreach ($campaign as &$cam) {
@@ -636,59 +635,59 @@ $app->post('/v1/user/profile/', function ($request, $response, $args) {
 	$resp['data'] = "";
 
 	
-	$user = \User::where("uuid", "=", $userid)->first();
+	$user = User::where("uuid", "=", $userid)->first();
 	if (!empty($name)) {
 		$user->name = $name;
 		$user->save();
 	}
 
 	if ($user->user_type == "brand") {
-		$profile1 = \Brand::where("user_id", "=", $user->uuid)->first();
+		$profile = Brand::where("user_id", "=", $user->uuid)->first();
 		if (!empty($website)) {
-			$profile1->website = $website;
+			$profile->website = $website;
 		}
 		if (!empty($profile_img)) {
-			$profile1->profile_img = $profile_img;
+			$profile->profile_img = $profile_img;
 		}
 		if (!empty($social_token)) {
-			$profile1->social_token = $social_token;
+			$profile->social_token = $social_token;
 		}
 		if (!empty($social_id)) {
-			$profile1->social_id = $social_id;
+			$profile->social_id = $social_id;
 		}
 		if (!empty($description)) {
-			$profile1->description = $description;
+			$profile->description = $description;
 		}
-		$profile1->save();
-		$resp['data'] = $profile1->toArray();
+		$profile->save();
+		$resp['data'] = $profile->toArray();
 	} else {
-		$profile2 = \Influencer::where("user_id", "=", $user->uuid)->first();
+		$profile = Influencer::where("user_id", "=", $user->uuid)->first();
 		if (!empty($profile_img)) {
-			$profile2->profile_img = $profile_img;
+			$profile->profile_img = $profile_img;
 		}
 		if (!empty($social_token)) {
-			$profile2->social_token = $social_token;
+			$profile->social_token = $social_token;
 		}
 		if (!empty($social_id)) {
-			$profile2->social_id = $social_id;
+			$profile->social_id = $social_id;
 		}
 		if (!empty($description)) {
-			$profile2->description = $description;
+			$profile->description = $description;
 		}
 		if (!empty($country)) {
-			$profile2->country = $country;
+			$profile->country = $country;
 		}
 		if (!empty($city)) {
-			$profile2->city = $city;
+			$profile->city = $city;
 		}
 		if (!empty($gender)) {
-			$profile2->gender = $gender;
+			$profile->gender = $gender;
 		}
 		if (!empty($reach_num)) {
-			$profile2->reach_num = $reach_num;
+			$profile->reach_num = $reach_num;
 		}
-		$profile2->save();
-		$resp['data'] = $profile2->toArray();
+		$profile->save();
+		$resp['data'] = $profile->toArray();
 	}
 	
 	$resp['data']['name'] = $user->name;
@@ -717,9 +716,9 @@ $app->post('/v1/user/rate', function ($request, $response, $args) {
 		$resp['code'] = 400;
 		goto end;
 	}
-	$user = \User::where("uuid", "=", $userid)->first();
+	$user = User::where("uuid", "=", $userid)->first();
 	if ($user->user_type == "influencer") {
-		$influ = \Influencer::where("user_id", "=", $userid)->first();
+		$influ = Influencer::where("user_id", "=", $userid)->first();
 		$influ->rate = $rate;
 		$resp['data']['rate'] = $rate;
 		$influ->save();
@@ -756,16 +755,16 @@ $app->post('/v1/user/interests', function ($request, $response, $args) {
 		$resp['code'] = 400;
 		goto end;
 	}
-	$user = \User::where("uuid", "=", $userid)->first();
-	\UserInterest::where('user_id', '=', $userid)->delete();
+	$user = User::where("uuid", "=", $userid)->first();
+	UserInterest::where('user_id', '=', $userid)->delete();
 	for ($i = 0; $i < count($data); $i++) {
-		$tag = \InterestTag::where('name', '=', $data[$i])->first();	
+		$tag = InterestTag::where('name', '=', $data[$i])->first();	
 		if ($tag == null) {
-			$tag = new \InterestTag;
+			$tag = new InterestTag;
 			$tag->name = $data[$i];
 			$tag->save();
 		}
-		$useri = new \UserInterest;
+		$useri = new UserInterest;
 		$useri->uuid = uniqid();
 		$useri->user_id = $userid;
 		$useri->tag = $data[$i];
@@ -786,7 +785,7 @@ $app->get('/v1/interest_tags', function ($request, $response, $args) {
 	$resp['error'] = "";
 	$resp['code'] = 200;
 
-	$tags = \InterestTag::all();
+	$tags = InterestTag::all();
 	$tagName = array();
 	foreach ($tags as $item) {
 		$tagName[] = $item->name;
@@ -814,7 +813,7 @@ $app->post('/v1/campaigns/{camid}/apply', function ($request, $response, $args) 
 		goto end;
 	}
 
-	$user = \User::where("uuid", "=", $userid)->first();
+	$user = User::where("uuid", "=", $userid)->first();
 
 	if ($user->user_type == "brand") {
 		$resp['error'] = "Only influencer can do that";
@@ -822,13 +821,13 @@ $app->post('/v1/campaigns/{camid}/apply', function ($request, $response, $args) 
 		goto end;
 	}
 
-	$campaignContract = \CampaignContract::where("influencer_id", "=", $userid)->where("campaign_id", "=", $camid)->first();
+	$campaignContract = CampaignContract::where("influencer_id", "=", $userid)->where("campaign_id", "=", $camid)->first();
 	if ($campaignContract != null) {
 		$resp['error'] = "You already applied for this campaign";
 		$resp['code'] = 403;
 		goto end;
 	} else {
-		$campaignContract = new \CampaignContract;
+		$campaignContract = new CampaignContract;
 		$campaignContract->uuid = uniqid();
 		$campaignContract->campaign_id = $camid;
 		$campaignContract->influencer_id = $userid;
@@ -860,7 +859,7 @@ $app->post('/v1/campaigns/{camid}/influencers/{influid}/offer', function ($reque
 		goto end;
 	}
 
-	$user = \User::where("uuid", "=", $userid)->first();
+	$user = User::where("uuid", "=", $userid)->first();
 
 	if ($user->user_type == "influencer") {
 		$resp['error'] = "Only brand can do that";
@@ -868,13 +867,13 @@ $app->post('/v1/campaigns/{camid}/influencers/{influid}/offer', function ($reque
 		goto end;
 	}
 
-	$campaignContract = \CampaignContract::where("influencer_id", "=", $influid)->where("campaign_id", "=", $camid)->first();
+	$campaignContract = CampaignContract::where("influencer_id", "=", $influid)->where("campaign_id", "=", $camid)->first();
 	if ($campaignContract != null) {
 		$resp['error'] = "This influencer already applied for this campaign";
 		$resp['code'] = 403;
 		goto end;
 	} else {
-		$campaignContract = new \CampaignContract;
+		$campaignContract = new CampaignContract;
 		$campaignContract->uuid = uniqid();
 		$campaignContract->campaign_id = $camid;
 		$campaignContract->influencer_id = $influid;
@@ -906,13 +905,13 @@ $app->get('/v1/campaigns/{camid}/influencers', function ($request, $response, $a
 		goto end;
 	}
 
-	$user = \User::where("uuid", "=", $userid)->first();
+	$user = User::where("uuid", "=", $userid)->first();
 
 	
-	$campaignContract = \CampaignContract::where("campaign_id", "=", $camid)->get();
+	$campaignContract = CampaignContract::where("campaign_id", "=", $camid)->get();
 	if ($campaignContract != null) {
 		foreach ($campaignContract as &$item) {
-			$item['influencer'] = \Influencer::where("user_id", "=", $item->influencer_id)->first();
+			$item['influencer'] = Influencer::where("user_id", "=", $item->influencer_id)->first();
 		}
 	}
 
@@ -938,8 +937,8 @@ $app->get('/v1/campaigns/{camid}/close', function ($request, $response, $args) {
 		goto end;
 	}
 
-	$user = \User::where("uuid", "=", $userid)->first();
-	$campaign = \Campaign::where("uuid", "=", $camid)->first();
+	$user = User::where("uuid", "=", $userid)->first();
+	$campaign = Campaign::where("uuid", "=", $camid)->first();
 	if ($campaign->brand_id != $user->uuid) {
 		$resp['error'] = "Permission denied to close this campaign";
 		$resp['code'] = 400;
@@ -959,7 +958,7 @@ $app->get('/v1/campaigns/{camid}/close', function ($request, $response, $args) {
 
 $app->post('/v1/influencers/list', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
-	$user = \User::where("uuid", "=", $userid)->first();
+	$user = User::where("uuid", "=", $userid)->first();
 
 	$page_size = isset($_GET['page_size']) ? $_GET['page_size'] : 20;
 	$page = isset($_GET['page']) ? $_GET['page'] : 1;
@@ -971,11 +970,11 @@ $app->post('/v1/influencers/list', function ($request, $response, $args) {
 	$resp['data'] = "";
 
 
-	$influencer = \Influencer::take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC");
-	$influencerCount = \Influencer::orderBy("created_at", "DESC");
+	$influencer = Influencer::take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC");
+	$influencerCount = Influencer::orderBy("created_at", "DESC");
 
 	if (!empty($data['tags'])) {
-		$tag = \UserInterest::whereIn("tag", $data['tags'])->get();
+		$tag = UserInterest::whereIn("tag", $data['tags'])->get();
 		$uuid = array();
 		foreach ($tag as $t) {
 			$uuid[] = $t->user_id;
@@ -1000,8 +999,8 @@ $app->post('/v1/influencers/list', function ($request, $response, $args) {
 	}
 
 	if (empty($data['tags']) && empty($data['gender']) && empty($data['reach_max']) && empty($data['rate_max'])) {
-		$influencer = \Influencer::take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC")->get();
-		$influencerCount = \Influencer::count();
+		$influencer = Influencer::take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC")->get();
+		$influencerCount = Influencer::count();
 	} else {
 		$influencer = $influencer->get();
 		$influencerCount = $influencerCount->count();
@@ -1032,7 +1031,7 @@ $app->post('/v1/influencers/list', function ($request, $response, $args) {
 
 $app->get('/v1/faqs', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
-	$user = \User::where("uuid", "=", $userid)->first();
+	$user = User::where("uuid", "=", $userid)->first();
 
 	$page_size = isset($_GET['page_size']) ? $_GET['page_size'] : 20;
 	$page = isset($_GET['page']) ? $_GET['page'] : 1;
@@ -1045,8 +1044,8 @@ $app->get('/v1/faqs', function ($request, $response, $args) {
 	$resp['data'] = "";
 
 
-	$campaign = \Faq::take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC");
-	$campaignCount = \Faq::orderBy("created_at", "DESC");
+	$campaign = Faq::take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC");
+	$campaignCount = Faq::orderBy("created_at", "DESC");
 	$campaign = $campaign->get();
 	$campaignCount = $campaignCount->count();
 

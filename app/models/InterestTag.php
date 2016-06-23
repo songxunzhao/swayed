@@ -1,5 +1,5 @@
 <?php 
-
+namespace Model;
 class InterestTag extends \Illuminate\Database\Eloquent\Model
 {
 
