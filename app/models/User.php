@@ -31,11 +31,13 @@ class User extends \Illuminate\Database\Eloquent\Model
 
         if($this->user_type == "brand")
         {
-            $data = array_merge($data, $this->brand->toArray());
+            if($this->brand)
+                $data = array_merge($data, $this->brand->toArray());
         }
         else if($this->user_type == "influencer")
         {
-            $data = array_merge($data, $this->influencer->toArray());
+            if($this->influencer)
+                $data = array_merge($data, $this->influencer->toArray());
         }
         return $data;
     }
