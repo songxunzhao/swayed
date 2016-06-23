@@ -971,10 +971,9 @@ $app->post('/v1/influencers/list', function ($request, $response, $args) {
 	$resp['error'] = "";
 	$resp['code'] = 200;
 	$resp['data'] = "";
-
-    Paginator::setCurrentPage($page);
+    
     Paginator::setBaseUrl('/v1/influencers/list');
-    Pagination::setPageName('page');
+    Paginator::setPageName('page');
 
 	$query = Influencer::where(DB::raw('1'),'=', 1);
 
