@@ -20,7 +20,7 @@ class User extends \Illuminate\Database\Eloquent\Model
     {
         return $this->hasOne('\Brand');
     }
-    public toProfileArray(){
+    public function toProfileArray(){
 
         $data = [
             'uuid' => $this->uuid

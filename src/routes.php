@@ -14,9 +14,9 @@ use Model\UserInterest;
 //test 
 //function
 function genToken($userid) {
-	$tk = \Token::where("user_id", "=", $userid)->first();
+	$tk = Token::where("user_id", "=", $userid)->first();
 	if ($tk == null) {
-		$tk = new \Token;
+		$tk = new Token;
 		$token = sha1(uniqid());
 		$tk->user_id = $userid;
 		$tk->token = $token;
@@ -38,7 +38,7 @@ function genToken($userid) {
 }
 
 function validateToken($token) {
-	$token = \Token::where("token", "=", $token)->first();
+	$token = Token::where("token", "=", $token)->first();
 	if ($token == null)
 		return "";
 	else {
@@ -101,7 +101,7 @@ $app->post('/v1/user/signup', function ($request, $response, $args) {
 		$resp['code'] = 400;
 		goto end;
 	}
-	if (\User::where('email', '=', $email)->first() != null) {
+	if (User::where('email', '=', $email)->first() != null) {
 		$resp['error'] = "Email exist"; 
 		$resp['code'] = 400;
 		goto end;
@@ -117,11 +117,11 @@ $app->post('/v1/user/signup', function ($request, $response, $args) {
 	$user->save();
 
 	if ($user_type == "brand") {
-		$brand = new \Brand;
+		$brand = new Brand;
 		$brand->user_id = $user->uuid;
 		$brand->save();
 	} else {
-		$influencer = new \Influencer;
+		$influencer = new Influencer;
 		$influencer->user_id = $user->uuid;
 		$influencer->save();
 	}
@@ -157,7 +157,7 @@ $app->post('/v1/user/login', function ($request, $response, $args) {
 		goto end;
 	}
 
-	$user = \User::where('email', '=', $email)->first();
+	$user = User::where('email', '=', $email)->first();
 	if ($user  == null) {
 		$resp['error'] = "Invalid login info"; 
 		$resp['code'] = 400;
@@ -175,7 +175,7 @@ $app->post('/v1/user/login', function ($request, $response, $args) {
 	$resp['data']['token'] =  genToken($user->uuid);
 	$resp['data']['profile'] = $profile->toProfileArray();
 
-	$tags = \UserInterest::where("user_id", "=", $user->uuid)->get();
+	$tags = UserInterest::where("user_id", "=", $user->uuid)->get();
 	$tagName = array();
 	foreach ($tags as $item) {
 		$tagName[] = $item->tag;
