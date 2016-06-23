@@ -642,7 +642,7 @@ $app->post('/v1/user/profile/', function ($request, $response, $args) {
 	}
 
 	if ($user->user_type == "brand") {
-		$profile = Brand::where("user_id", "=", $user->uuid)->first();
+        $profile = Brand::firstOrNew(['user_id'=>$user->uuid]);
 		if (!empty($website)) {
 			$profile->website = $website;
 		}
@@ -661,7 +661,7 @@ $app->post('/v1/user/profile/', function ($request, $response, $args) {
 		$profile->save();
 		$resp['data'] = $profile->toArray();
 	} else {
-		$profile = Influencer::where("user_id", "=", $user->uuid)->first();
+        $profile = Influencer::firstOrNew(['user_id'=>$user->uuid]);
 		if (!empty($profile_img)) {
 			$profile->profile_img = $profile_img;
 		}
