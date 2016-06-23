@@ -9,4 +9,5 @@ class Influencer extends \Illuminate\Database\Eloquent\Model
 	 * @var string
 	 */
 	protected $table = 'influencer';
+    protected $fillable = ['user_id'];
 }

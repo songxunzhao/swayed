@@ -11,4 +11,5 @@ class Brand extends Model
 	 * @var string
 	 */
 	protected $table = 'brand';
+    protected $fillable = ['user_id'];
 }
