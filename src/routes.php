@@ -10,6 +10,7 @@ use Model\InterestTag;
 use Model\Token;
 use Model\User;
 use Model\UserInterest;
+use Illuminate\Pagination;
 
 //test 
 //function
@@ -971,9 +972,11 @@ $app->post('/v1/influencers/list', function ($request, $response, $args) {
 	$resp['code'] = 200;
 	$resp['data'] = "";
 
+    Paginator::setCurrentPage($page);
+    Paginator::setBaseUrl('/v1/influencers/list');
+    Pagination::setPageName('page');
 
-	$influencer = Influencer::take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC");
-	$influencerCount = Influencer::orderBy("created_at", "DESC");
+	$query = Influencer::where(DB::raw('1'),'=', 1);
 
 	if (!empty($data['tags'])) {
 		$tag = UserInterest::whereIn("tag", $data['tags'])->get();
@@ -981,47 +984,28 @@ $app->post('/v1/influencers/list', function ($request, $response, $args) {
 		foreach ($tag as $t) {
 			$uuid[] = $t->user_id;
 		}
-		$influencer = $influencer->whereIn("user_id", $uuid);
-		$influencerCount = $influencerCount->whereIn("user_id", $uuid);
+		$query = $query->whereIn("user_id", $uuid);
 	}
 
 	if (!empty($data['gender'])) {
-		$influencer = $influencer->where("gender", "=", $data['gender']);
-		$influencerCount = $influencerCount->where("gender", "=", $data['gender']);
+		$query = $query->where("gender", "=", $data['gender']);
 	}
 
 	if (!empty($data['reach_max'])) {
-		$influencer = $influencer->where("reach_num", "<", $data['reach_max']);
-		$influencerCount = $influencerCount->where("reach_num", "<", $data['reach_max']);
+		$query = $query->where("reach_num", "<", $data['reach_max']);
 	}
 
 	if (!empty($data['rate_max'])) {
-		$influencer = $influencer->where("rate", "<", $data['rate_max']);
-		$influencerCount = $influencerCount->where("rate", "<", $data['rate_max']);
+		$query = $query->where("rate", "<", $data['rate_max']);
 	}
 
-	if (empty($data['tags']) && empty($data['gender']) && empty($data['reach_max']) && empty($data['rate_max'])) {
-		$influencer = Influencer::take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC")->get();
-		$influencerCount = Influencer::count();
-	} else {
-		$influencer = $influencer->get();
-		$influencerCount = $influencerCount->count();
-	}
+    $influencer_list = $query->orderBy("created_at", "DESC")->paginate($page_size);
 
-	$resp['data']['results'] = $influencer->toArray();
-	
-	$resp['data']['count'] = $influencerCount;
-	if ($page_size * $page < $influencerCount) {
-		$resp['data']['next'] = '/v1/influencer/list?page_size=' . $page_size . '&page=' . ($page + 1); 
-	} else {
-		$resp['data']['next'] = null;
-	}
-	if ($page > 1) {
-		$resp['data']['prev'] = '/v1/influencer/list?page_size=' . $page_size . '&page=' . ($page - 1); 
-	} else {
-		$resp['data']['prev'] = null; 
-	}
-
+    /*$results = [];
+    foreach($influencer in $influencer_list) {
+        $results[] = $influencer->toArray();
+    }*/
+	$resp['data']['results'] = $influencer_list->toArray();
 
 	end:
     $response->getBody()->write(json_encode($resp));

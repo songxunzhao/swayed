@@ -17,6 +17,7 @@
         "slim/php-view": "^2.0",
         "monolog/monolog": "^1.17",
         "illuminate/database": "^5.2",
-        "robmorgan/phinx": "^0.6.2"
+        "robmorgan/phinx": "^0.6.2",
+        "Illuminate/Pagination": "^5.2"
     }
 }
