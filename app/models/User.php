@@ -13,12 +13,12 @@ class User extends \Illuminate\Database\Eloquent\Model
 
     public function influencer()
     {
-        return $this->hasOne('Influencer');
+        return $this->hasOne('Model\Influencer');
     }
 
     public function brand()
     {
-        return $this->hasOne('Brand');
+        return $this->hasOne('Model\Brand');
     }
     public function toProfileArray(){
 
