@@ -23,7 +23,7 @@ class User extends \Illuminate\Database\Eloquent\Model
     public function toProfileArray(){
 
         $data = [
-            'uuid' => $this->uuid
+            'uuid' => $this->uuid,
             'email' => $this->email,
             'name' => $this->name,
             'user_type'=> $this->user_type
