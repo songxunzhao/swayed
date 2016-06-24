@@ -930,14 +930,14 @@ $app->get('/v1/campaigns/{camid}/influencers', function ($request, $response, $a
 	$user = User::where("uuid", "=", $userid)->first();
 
 	
-	$campaignContract = CampaignContract::where("campaign_id", "=", $camid)->get();
-	if ($campaignContract != null) {
-		foreach ($campaignContract as &$item) {
+	$contracts = CampaignContract::where("campaign_id", "=", $camid)->get();
+	if ($contracts != null) {
+		foreach ($contracts as &$item) {
 			$item['influencer'] = Influencer::where("user_id", "=", $item->influencer_id)->first();
 		}
 	}
 
-	$resp['data'] = $campaignContract->toArray();
+	$resp['data'] = $contracts->toArray();
 	end:
     $response->getBody()->write(json_encode($resp));
 
@@ -1014,16 +1014,16 @@ $app->post('/v1/influencers/list', function ($request, $response, $args) {
 		$query = $query->where("rate", "<", $data['rate_max']);
 	}
 
-    $influencer_list = $query->orderBy("created_at", "DESC")->paginate($page_size);
+    $influencers = $query->orderBy("created_at", "DESC")->paginate($page_size);
 
     $results = [];
-    foreach($influencer_list as $influencer) {
+    foreach($influencers as $influencer) {
         $results[] = $influencer->toProfileArray();
     }
 	$resp['data']['results'] = $results;
-    $resp['data']['next'] = $influencer_list->nextPageUrl();
-    $resp['data']['prev'] = $influencer_list->previousPageUrl();
-    $resp['data']['count'] = $influencer_list->count();
+    $resp['data']['next'] = $influencers->nextPageUrl();
+    $resp['data']['prev'] = $influencers->previousPageUrl();
+    $resp['data']['count'] = $influencers->count();
     $response->getBody()->write(json_encode($resp));
 
     return $response;
@@ -1036,7 +1036,6 @@ $app->get('/v1/faqs', function ($request, $response, $args) {
 	$user = User::where("uuid", "=", $userid)->first();
 
 	$page_size = isset($_GET['page_size']) ? $_GET['page_size'] : 20;
-	$page = isset($_GET['page']) ? $_GET['page'] : 1;
 
 	$data = $request->getParsedBody();
 
@@ -1046,27 +1045,12 @@ $app->get('/v1/faqs', function ($request, $response, $args) {
 	$resp['data'] = "";
 
 
-	$campaign = Faq::take($page_size)->skip($page_size*($page - 1))->orderBy("created_at", "DESC");
-	$campaignCount = Faq::orderBy("created_at", "DESC");
-	$campaign = $campaign->get();
-	$campaignCount = $campaignCount->count();
+	$campaigns = Faq::orderBy("created_at", "DESC")->paginate($page_size);
 
-	$resp['data']['results'] = $campaign->toArray();
-	
-	$resp['data']['count'] = $campaignCount;
-	if ($page_size * $page < $campaignCount) {
-		$resp['data']['next'] = '/v1/faqs?page_size=' . $page_size . '&page=' . ($page + 1); 
-	} else {
-		$resp['data']['next'] = null;
-	}
-	if ($page > 1) {
-		$resp['data']['prev'] = '/v1/faqs?page_size=' . $page_size . '&page=' . ($page - 1); 
-	} else {
-		$resp['data']['prev'] = null; 
-	}
-
-
-	end:
+	$resp['data']['results'] = $campaigns->items->toArray();
+    $resp['data']['next'] = $campaigns->nextPageUrl();
+    $resp['data']['prev'] = $campaigns->previousPageUrl();
+    $resp['data']['count'] = $campaigns->count();
     $response->getBody()->write(json_encode($resp));
 
     return $response;
