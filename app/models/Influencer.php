@@ -12,7 +12,10 @@ class Influencer extends \Illuminate\Database\Eloquent\Model
         return $this->belongsTo('Model\User', 'user_id', 'uuid');
     }
 	protected $table = 'influencer';
-    protected $fillable = ['user_id'];
+    protected $fillable = ['user_id', 'social_id',
+                            'social_token', 'gender', 'country',
+                            'city', 'description','profile_img',
+                            'rate', 'reach_num','num_photos'];
 
     public function toProfileArray(){
         $data = $this->toArray();

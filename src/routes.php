@@ -653,32 +653,9 @@ $app->post('/v1/user/profile/', function ($request, $response, $args) {
 		$resp['data'] = $profile->toArray();
 	} else {
         $profile = Influencer::firstOrNew(['user_id'=>$userid]);
-        $profile->user_id = $userid;
-		if (!empty($profile_img)) {
-			$profile->profile_img = $profile_img;
-		}
-		if (!empty($social_token)) {
-			$profile->social_token = $social_token;
-		}
-		if (!empty($social_id)) {
-			$profile->social_id = $social_id;
-		}
-		if (!empty($description)) {
-			$profile->description = $description;
-		}
-		if (!empty($country)) {
-			$profile->country = $country;
-		}
-		if (!empty($city)) {
-			$profile->city = $city;
-		}
-		if (!empty($gender)) {
-			$profile->gender = $gender;
-		}
-		if (!empty($reach_num)) {
-			$profile->reach_num = $reach_num;
-		}
-		$profile->save();
+        if(isset($data['user_id']))
+            unset($data['user_id']);
+		$profile->update($data);
 		$resp['data'] = $profile->toArray();
 	}
 	
