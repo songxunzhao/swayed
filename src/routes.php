@@ -11,7 +11,7 @@ use Model\Token;
 use Model\User;
 use Model\UserInterest;
 use Illuminate\Pagination\Paginator;
-
+use DB;
 //test 
 //function
 function genToken($userid) {
