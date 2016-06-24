@@ -1022,7 +1022,7 @@ $app->post('/v1/influencers/list', function ($request, $response, $args) {
     }
 	$resp['data']['results'] = $results;
     $resp['data']['next'] = $influencer_list->nextPageUrl();
-    $resp['data']['prev'] = $influencer_list->prevPageUrl();
+    $resp['data']['prev'] = $influencer_list->previousPageUrl();
     $resp['data']['count'] = $influencer_list->count();
     $response->getBody()->write(json_encode($resp));
 
