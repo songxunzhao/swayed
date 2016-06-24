@@ -8,6 +8,23 @@ class Influencer extends \Illuminate\Database\Eloquent\Model
 	 *
 	 * @var string
 	 */
+    public function user() {
+        return $this->belongsTo('Model\User', 'user_id', 'uuid');
+    }
 	protected $table = 'influencer';
     protected $fillable = ['user_id'];
+
+    public function toProfileArray(){
+        $user = $this->user;
+        $user_data = [
+            'uuid' => $user->uuid,
+            'email' => $user->email,
+            'name' => $user->name,
+            'user_type'=> $user->user_type
+        ];
+
+        $data = $this->toArray();
+        array_merge($data, $user_data);
+        return $data;
+    }
 }

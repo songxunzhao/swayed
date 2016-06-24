@@ -1016,13 +1016,14 @@ $app->post('/v1/influencers/list', function ($request, $response, $args) {
 
     $influencer_list = $query->orderBy("created_at", "DESC")->paginate($page_size);
 
-    /*$results = [];
-    foreach($influencer in $influencer_list) {
-        $results[] = $influencer->toArray();
-    }*/
-	$resp['data']['results'] = $influencer_list->toArray();
-
-	end:
+    $results = [];
+    foreach($influencer_list as $influencer) {
+        $results[] = $influencer->toProfileArray();
+    }
+	$resp['data']['results'] = $results;
+    $resp['data']['next'] = $influencer_list->nextPageUrl();
+    $resp['data']['prev'] = $influencer_list->prevPageUrl();
+    $resp['data']['count'] = $influencer_list->count();
     $response->getBody()->write(json_encode($resp));
 
     return $response;
