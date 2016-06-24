@@ -59,13 +59,18 @@ $app->add(function ($request, $response, $next) {
     // Global setting
     Paginator::currentPathResolver(function()
     {
-        $reqPath = $this->request->getUri()->getPath();
+        $uri = $this->request->getUri();
+        $reqPath = $uri->getBaseUrl() . '/' . $uri->getPath();
         return $reqPath;
     });
 
     Paginator::currentPageResolver(function()
     {
-        return 1;
+        $params = $this->request->getQueryParams();
+        if($params['page'])
+          return $params['page'];
+        else
+          return 1;
     });
 
 	if ($reqPath == 'v1/user/login' || $reqPath == 'v1/user/signup' || $reqPath == 'v1/contact_requests') {
