@@ -633,15 +633,16 @@ $app->post('/v1/user/profile/', function ($request, $response, $args) {
 
 	if ($user->user_type == "brand") {
         $profile = Brand::firstOrNew(['user_id'=>$userid]);
-        $profile->user_id = $userid;
+        $data['user_id'] = $userid;
         if(isset($data['user_id']))
             unset($data['user_id']);
         $profile->update($data);
+        $profile->save();
 	} else {
         $profile = Influencer::firstOrNew(['user_id'=>$userid]);
-        if(isset($data['user_id']))
-            unset($data['user_id']);
+        $data['user_id'] = $userid;
 		$profile->update($data);
+        $profile->save();
 	}
 	end:
     $resp['data'] = $user->toProfileArray();
