@@ -1047,7 +1047,7 @@ $app->get('/v1/faqs', function ($request, $response, $args) {
 
 	$campaigns = Faq::orderBy("created_at", "DESC")->paginate($page_size);
 
-	$resp['data']['results'] = $campaigns->items->toArray();
+	$resp['data']['results'] = $campaigns->getCollection()->toArray();
     $resp['data']['next'] = $campaigns->nextPageUrl();
     $resp['data']['prev'] = $campaigns->previousPageUrl();
     $resp['data']['count'] = $campaigns->count();
