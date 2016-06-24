@@ -60,7 +60,7 @@ $app->add(function ($request, $response, $next) {
     Paginator::currentPathResolver(function()
     {
         $uri = $this->request->getUri();
-        $reqParams = $uri->getQueryParams();
+        $reqParams = $this->request->getQueryParams();
 
         if(isset($reqParams['page']))
             unset($reqParams['page']);
