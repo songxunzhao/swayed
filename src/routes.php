@@ -60,7 +60,12 @@ $app->add(function ($request, $response, $next) {
     Paginator::currentPathResolver(function()
     {
         $uri = $this->request->getUri();
-        $reqPath = $uri->getBaseUrl() . '/' . $uri->getPath().'?' .$uri->getQuery();
+        $reqParams = $uri->getQueryParams();
+
+        if(isset($reqParams['page']))
+            unset($reqParams['page']);
+
+        $reqPath = $uri->getBaseUrl() . '/' . $uri->getPath().'?' . http_build_query($reqParams);
         return $reqPath;
     });
 
