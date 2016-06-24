@@ -15,6 +15,8 @@ class Influencer extends \Illuminate\Database\Eloquent\Model
     protected $fillable = ['user_id'];
 
     public function toProfileArray(){
+        $data = $this->toArray();
+        
         $user = $this->user;
         $user_data = [
             'uuid' => $user->uuid,
@@ -23,8 +25,7 @@ class Influencer extends \Illuminate\Database\Eloquent\Model
             'user_type'=> $user->user_type
         ];
 
-        $data = $this->toArray();
-        array_merge($data, $user_data);
+        $data = array_merge($data, $user_data);
         return $data;
     }
 }
