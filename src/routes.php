@@ -634,35 +634,17 @@ $app->post('/v1/user/profile/', function ($request, $response, $args) {
 	if ($user->user_type == "brand") {
         $profile = Brand::firstOrNew(['user_id'=>$userid]);
         $profile->user_id = $userid;
-		if (!empty($website)) {
-			$profile->website = $website;
-		}
-		if (!empty($profile_img)) {
-			$profile->profile_img = $profile_img;
-		}
-		if (!empty($social_token)) {
-			$profile->social_token = $social_token;
-		}
-		if (!empty($social_id)) {
-			$profile->social_id = $social_id;
-		}
-		if (!empty($description)) {
-			$profile->description = $description;
-		}
-		$profile->save();
-		$resp['data'] = $profile->toArray();
+        if(isset($data['user_id']))
+            unset($data['user_id']);
+        $profile->update($data);
 	} else {
         $profile = Influencer::firstOrNew(['user_id'=>$userid]);
         if(isset($data['user_id']))
             unset($data['user_id']);
 		$profile->update($data);
-		$resp['data'] = $profile->toArray();
 	}
-	
-	$resp['data']['name'] = $user->name;
-	
-
 	end:
+    $resp['data'] = $user->toProfileArray();
     $response->getBody()->write(json_encode($resp));
 
     return $response;
