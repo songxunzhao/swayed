@@ -1,4 +1,6 @@
 <?php
+use Illuminate\Database\Capsule\Manager as Capsule;
+
 if (PHP_SAPI == 'cli-server') {
     // To help the built-in PHP dev server, check if the request was actually for
     // something which should probably be served as a static file
@@ -47,14 +49,10 @@ $settings = array(
     'prefix' => '',
     'charset'   => 'utf8',
 );
-
-$container = new Illuminate\Container\Container;
-$connFactory = new \Illuminate\Database\Connectors\ConnectionFactory($container);
-$conn = $connFactory->make($settings);
-$resolver = new \Illuminate\Database\ConnectionResolver();
-$resolver->addConnection('default', $conn);
-$resolver->setDefaultConnection('default');
-\Illuminate\Database\Eloquent\Model::setConnectionResolver($resolver);
+$capsule = new Capsule;
+$capsule->addConnection($settings);
+$capsule->bootEloquent();
+$capsule->setAsGlobal();
 
 // Run app
 $app->run();

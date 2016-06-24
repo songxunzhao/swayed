@@ -11,8 +11,9 @@ use Model\Token;
 use Model\User;
 use Model\UserInterest;
 use Illuminate\Pagination\Paginator;
-use Illuminate\Database\Capsule as DB;
-//test 
+use Illuminate\Database\Capsule\Manager as Capsule;
+
+//test
 //function
 function genToken($userid) {
 	$tk = Token::where("user_id", "=", $userid)->first();
