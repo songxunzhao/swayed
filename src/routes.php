@@ -60,7 +60,7 @@ $app->add(function ($request, $response, $next) {
     Paginator::currentPathResolver(function()
     {
         $uri = $this->request->getUri();
-        $reqPath = $uri->getBaseUrl() . '/' . $uri->getPath();
+        $reqPath = $uri->getBaseUrl() . '/' . $uri->getPath().'?' .$uri->getQuery();
         return $reqPath;
     });
 
@@ -537,7 +537,6 @@ $app->post('/v1/campaigns/list', function ($request, $response, $args) {
 
     $campaigns = $query->paginate($page_size);
 	foreach ($campaigns as &$cam) {
-		$cam->detail_images = json_decode($cam->detail_images, true);
 
 		$campainTag = CampaignTag::where("campaign_id", "=", $cam->uuid)->get();
 		$required_tags = array();
@@ -551,7 +550,7 @@ $app->post('/v1/campaigns/list', function ($request, $response, $args) {
     $resp['data']['next'] = $campaigns->nextPageUrl();
     $resp['data']['prev'] = $campaigns->previousPageUrl();
     $resp['data']['count'] = $campaigns->total();
-    
+
     $response->getBody()->write(json_encode($resp));
 
     return $response;
@@ -562,7 +561,6 @@ $app->get('/v1/brand/campaigns', function ($request, $response, $args) {
 	$user = User::where("uuid", "=", $userid)->first();
 
 	$page_size = isset($_GET['page_size']) ? $_GET['page_size'] : 20;
-	$page = isset($_GET['page']) ? $_GET['page'] : 1;
 	$status = isset($_GET['status']) ? $_GET['status'] : 0;
 
 	$data = $request->getParsedBody();
@@ -579,31 +577,20 @@ $app->get('/v1/brand/campaigns', function ($request, $response, $args) {
 		goto end;
 	}
 	if ($status > 0) {
-		$campaign = Campaign::where("brand_id", "=", $userid)->where("status", "=", $status)->take($page_size)->skip($page_size*($page - 1))->orderBy("status", "ASC")->orderBy("created_at", "DESC")->get();
-		$campaignCount = Campaign::where("brand_id", "=", $userid)->where("status", "=", $status)->count();
+		$campaigns = Campaign::where("brand_id", "=", $userid)->where("status", "=", $status)->orderBy("status", "ASC")->orderBy("created_at", "DESC")->paginate($page_size);
 
 	} else {
-		$campaign = Campaign::where("brand_id", "=", $userid)->take($page_size)->skip($page_size*($page - 1))->orderBy("status", "ASC")->orderBy("created_at", "DESC")->get();
-		$campaignCount = Campaign::where("brand_id", "=", $userid)->count();
+		$campaigns = Campaign::where("brand_id", "=", $userid)->take($page_size)->skip($page_size*($page - 1))->orderBy("status", "ASC")->orderBy("created_at", "DESC")->paginate($page_size);
 	}
 
-	foreach ($campaign as &$cam) {
+	foreach ($campaigns as &$cam) {
 		$cam->detail_images = json_decode($cam->detail_images, true);
 	}
 	
-	$resp['data']['results'] = $campaign->toArray();
-	$resp['data']['count'] = $campaignCount;
-	if ($page_size * $page < $campaignCount) {
-		$resp['data']['next'] = '/v1/campaign/list?page_size=' . $page_size . '&page=' . ($page + 1); 
-	} else {
-		$resp['data']['next'] = null;
-	}
-	if ($page > 1) {
-		$resp['data']['prev'] = '/v1/campaign/list?page_size=' . $page_size . '&page=' . ($page - 1); 
-	} else {
-		$resp['data']['prev'] = null; 
-	}
-
+	$resp['data']['results'] = $campaigns->getCollection()->toArray();
+	$resp['data']['count'] = $campaigns->total();
+    $resp['data']['next'] = $campaigns->nextPageUrl();
+    $resp['data']['prev'] = $campaigns->previousPageUrl();
 
 	end:
     $response->getBody()->write(json_encode($resp));
