@@ -11,7 +11,7 @@ use Model\Token;
 use Model\User;
 use Model\UserInterest;
 use Illuminate\Pagination\Paginator;
-use Illuminate\Database\Capsule\Manager as Capsule;
+use Illuminate\Database\Capsule\Manager as DB;
 
 //test
 //function
