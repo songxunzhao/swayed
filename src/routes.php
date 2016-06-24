@@ -13,7 +13,7 @@ use Model\UserInterest;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Database\Capsule\Manager as DB;
 
-//test
+
 //function
 function genToken($userid) {
 	$tk = Token::where("user_id", "=", $userid)->first();
@@ -55,6 +55,19 @@ function validateToken($token) {
 //Middleware
 $app->add(function ($request, $response, $next) {
 	$reqPath = $request->getUri()->getPath();
+
+    // Global setting
+    Paginator::currentPathResolver(function()
+    {
+        $reqPath = $this->request->getUri()->getPath();
+        return $reqPath;
+    });
+
+    Paginator::currentPageResolver(function()
+    {
+        return 1;
+    });
+
 	if ($reqPath == 'v1/user/login' || $reqPath == 'v1/user/signup' || $reqPath == 'v1/contact_requests') {
 		$response = $next($request, $response);
 	} else {
@@ -972,9 +985,6 @@ $app->post('/v1/influencers/list', function ($request, $response, $args) {
 	$resp['error'] = "";
 	$resp['code'] = 200;
 	$resp['data'] = "";
-
-    Paginator::setPath('/v1/influencers/list');
-    Paginator::setPageName('page');
 
 	$query = Influencer::where(DB::raw('1'),'=', 1);
 
