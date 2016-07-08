@@ -565,6 +565,7 @@ $app->get('/v1/brand/campaigns', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
 	$user = User::where("uuid", "=", $userid)->first();
 
+    $page = isset($_GET['page']) ? $_GET['page']: 1;
 	$page_size = isset($_GET['page_size']) ? $_GET['page_size'] : 20;
 	$status = isset($_GET['status']) ? $_GET['status'] : 0;
 
@@ -585,7 +586,7 @@ $app->get('/v1/brand/campaigns', function ($request, $response, $args) {
 		$campaigns = Campaign::where("brand_id", "=", $userid)->where("status", "=", $status)->orderBy("status", "ASC")->orderBy("created_at", "DESC")->paginate($page_size);
 
 	} else {
-		$campaigns = Campaign::where("brand_id", "=", $userid)->take($page_size)->skip($page_size*($page - 1))->orderBy("status", "ASC")->orderBy("created_at", "DESC")->paginate($page_size);
+		$campaigns = Campaign::where("brand_id", "=", $userid)->orderBy("status", "ASC")->orderBy("created_at", "DESC")->paginate($page_size);
 	}
 
 	foreach ($campaigns as &$cam) {
@@ -874,7 +875,7 @@ $app->get('/v1/campaigns/{camid}/influencers', function ($request, $response, $a
     return $response;
 });
 
-$app->get('/v1/campaigns/{camid}/close', function ($request, $response, $args) {
+$app->get('/v1/campaigns/{camid}/cancel', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
 	$camid = ($request->getAttribute("camid"));
 
