@@ -9,6 +9,6 @@
 namespace Model;
 
 
-class CampaignInterest {
+class CampaignInterest extends \Illuminate\Database\Eloquent\Model{
     protected $table = 'campaign_interest';
 }

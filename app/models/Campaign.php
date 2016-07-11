@@ -15,4 +15,14 @@ class Campaign extends \Illuminate\Database\Eloquent\Model
         $data['detail_images'] = json_decode($this->detail_images);
         return $data;
     }
+    public function toDetailArray() {
+        $data = $this->toArray();
+
+        $tag_list = [];
+        $interests = CampaignInterest::where('campaign_id', $this->uuid)->get();
+        foreach($interests as $interest) {
+            $tag_list[] = $interest->tag;
+        }
+        $data['interest_tags'] = $tag_list;
+    }
 }

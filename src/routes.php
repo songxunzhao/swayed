@@ -484,7 +484,7 @@ $app->get('/v1/campaigns/{camid}', function ($request, $response, $args) {
 		goto end;
 	}
 
-	$resp['data'] = $campaign->toArray();
+	$resp['data'] = $campaign->toDetailArray();
 
 	end:
     $response->getBody()->write(json_encode($resp));
