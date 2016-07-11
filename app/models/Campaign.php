@@ -24,5 +24,6 @@ class Campaign extends \Illuminate\Database\Eloquent\Model
             $tag_list[] = $interest->tag;
         }
         $data['interest_tags'] = $tag_list;
+        return $data;
     }
 }
