@@ -9,4 +9,10 @@ class Campaign extends \Illuminate\Database\Eloquent\Model
 	 * @var string
 	 */
 	protected $table = 'campaign';
+    public function toArray(){
+        $data = parent::toArray();
+        $data['hashtags'] = json_decode($this->hashtags);
+        $data['detail_images'] = json_decode($this->detail_images);
+        return $data;
+    }
 }

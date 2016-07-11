@@ -2,7 +2,7 @@
 use Model\Brand;
 use Model\Campaign;
 use Model\CampaignContract;
-use Model\CampaignTag;
+use Model\CampaignInterest;
 use Model\ContactRequest;
 use Model\Faq;
 use Model\Influencer;
@@ -169,7 +169,6 @@ $app->post('/v1/user/login', function ($request, $response, $args) {
 	$resp = array();
 	$resp['error'] = "";
 	$resp['code'] = 200;
-	$resp['data'] = "";
 	//valiate
 	if (empty($password) || empty($email)) {
 		$resp['error'] = "Some fields are missing or wrong"; 
@@ -197,7 +196,7 @@ $app->post('/v1/user/login', function ($request, $response, $args) {
 
 
 	$resp['data'] = array();
-	$resp['data']['token'] =  genToken($user->uuid);
+	$resp['data']['token'] = genToken($user->uuid);
 	$resp['data']['profile'] = $user->toProfileArray();
 
 	$tags = UserInterest::where("user_id", "=", $user->uuid)->get();
@@ -252,8 +251,8 @@ $app->post('/v1/images', function ($request, $response, $args) {
 });
 
 $app->post('/v1/campaigns', function ($request, $response, $args) {
-	$userid = $request->getAttribute('userid');
-	$user = User::where("uuid", "=", $userid)->first();
+	$user_id = $request->getAttribute('userid');
+	$user = User::where("uuid", "=", $user_id)->first();
 
 	$data = $request->getParsedBody();
 	$main_image = $data['main_image'];
@@ -271,7 +270,7 @@ $app->post('/v1/campaigns', function ($request, $response, $args) {
 	$resp['data'] = "";
 
 	if ($user->user_type == "influencer") {
-		$resp['error'] = "Only brand can do that";
+		$resp['error'] = "Only brand can create campaigns";
 		$resp['code'] = 400;
 		goto end;
 	}
@@ -287,26 +286,26 @@ $app->post('/v1/campaigns', function ($request, $response, $args) {
 	$campaign->allow_action = $allow_action;
 	$campaign->ban_action = $ban_action;
 	$campaign->uuid = 'ca'. uniqid();
-	$campaign->brand_id = $userid;
+	$campaign->brand_id = $user_id;
 	$campaign->name = $name;
 	$campaign->status = 1;
 	$campaign->detail_images = json_encode($detail_images);
-	$campaign->save();
+    if (!empty($required_tags)) {
+        $campaign->hashtags = json_encode($required_tags);
+    }
+    $campaign->save();
 
-	if (!empty($required_tags)) {
-		for ($i = 0; $i < count($required_tags); $i ++) {
-			$tag = new CampaignTag;
-			$tag->uuid = uniqid();
-			$tag->campaign_id = $campaign->uuid;
-			$tag->tag = $required_tags[$i];
-			$tag->save();
-		}
-	}
-	
+	// Copy brand's interest tags from campaign
+    $interests = UserInterest::where('user_id','=', $user_id)->get();
+    foreach($interests as $interest) {
+        $ca_interest = new CampaignInterest;
+        $ca_interest->campaign_id = $campaign->uuid;
+        $ca_interest->uuid = 'ci' . uniqid();
+        $ca_interest->tag  = $interest->tag;
+        $ca_interest->save();
+    }
+
 	$resp['data'] = $campaign->toArray();
-	$resp['data']['detail_images'] = json_decode($campaign->detail_images, true);
-	$resp['data']['required_tags'] = $required_tags;
-	
 
 	end:
     $response->getBody()->write(json_encode($resp));
@@ -454,21 +453,11 @@ $app->put('/v1/campaigns/ca{camid}', function ($request, $response, $args) {
 		$campaign->detail_images = json_encode($detail_images);
 	}
 	if (!empty($required_tags)) {
-		CampaignTag::where("campaign_id", "=", $camid)->delete();
-		for ($i = 0; $i < count($required_tags); $i ++) {
-			$tag = new CampaignTag;
-			$tag->uuid = uniqid();
-			$tag->campaign_id = $campaign->uuid;
-			$tag->tag = $required_tags[$i];
-			$tag->save();
-		}
+		$campaign->hashtags = json_encode($required_tags);
 	}
 	$campaign->save();
 	
 	$resp['data'] = $campaign->toArray();
-	$resp['data']['detail_images'] = json_decode($campaign->detail_images, true);
-	$resp['data']['required_tags'] =$required_tags;
-	
 
 	end:
     $response->getBody()->write(json_encode($resp));
@@ -495,15 +484,7 @@ $app->get('/v1/campaigns/{camid}', function ($request, $response, $args) {
 		goto end;
 	}
 
-	$campainTag = CampaignTag::where("campaign_id", "=", $camid)->get();
-	$required_tags = array();
-	foreach ($campainTag as $item) { 
-		$required_tags[] = $item->tag;
-	}
-	
 	$resp['data'] = $campaign->toArray();
-	$resp['data']['detail_images'] = json_decode($campaign->detail_images, true);
-	$resp['data']['required_tags'] = $required_tags;
 
 	end:
     $response->getBody()->write(json_encode($resp));
@@ -528,7 +509,7 @@ $app->post('/v1/campaigns/list', function ($request, $response, $args) {
 	$query = Campaign::where('status', '<>', 3)->orderBy("created_at", "DESC");
 
 	if (!empty($data['tags'])) {
-		$tag = CampaignTag::whereIn("tag", $data['tags'])->get();
+		$tag = CampaignInterest::whereIn("tag", $data['tags'])->get();
 		$uuid = array();
 		foreach ($tag as $t) {
 			$uuid[] = $t->campaign_id;
@@ -541,15 +522,6 @@ $app->post('/v1/campaigns/list', function ($request, $response, $args) {
 	}
 
     $campaigns = $query->paginate($page_size);
-	foreach ($campaigns as &$cam) {
-
-		$campainTag = CampaignTag::where("campaign_id", "=", $cam->uuid)->get();
-		$required_tags = array();
-		foreach ($campainTag as $item) { 
-			$required_tags[] = $item->tag;
-		}
-		$cam->required_tags = $required_tags;
-	}
 
     $resp['data']['results'] = $campaigns->getCollection()->toArray();
     $resp['data']['next'] = $campaigns->nextPageUrl();
@@ -582,21 +554,17 @@ $app->get('/v1/brand/campaigns', function ($request, $response, $args) {
 		$resp['code'] = 400;
 		goto end;
 	}
+
+    $campaign_list = Campaign::where("brand_id", "=", $userid);
 	if ($status > 0) {
-		$campaigns = Campaign::where("brand_id", "=", $userid)->where("status", "=", $status)->orderBy("status", "ASC")->orderBy("created_at", "DESC")->paginate($page_size);
-
-	} else {
-		$campaigns = Campaign::where("brand_id", "=", $userid)->orderBy("status", "ASC")->orderBy("created_at", "DESC")->paginate($page_size);
+        $campaign_list = $campaign_list->where("status", "=", $status);
 	}
-
-	foreach ($campaigns as &$cam) {
-		$cam->detail_images = json_decode($cam->detail_images, true);
-	}
+    $campaign_list = $campaign_list->orderBy("status", "ASC")->orderBy("created_at", "DESC")->paginate($page_size);
 	
-	$resp['data']['results'] = $campaigns->getCollection()->toArray();
-	$resp['data']['count'] = $campaigns->total();
-    $resp['data']['next'] = $campaigns->nextPageUrl();
-    $resp['data']['prev'] = $campaigns->previousPageUrl();
+	$resp['data']['results'] = $campaign_list->getCollection()->toArray();
+	$resp['data']['count'] = $campaign_list->total();
+    $resp['data']['next'] = $campaign_list->nextPageUrl();
+    $resp['data']['prev'] = $campaign_list->previousPageUrl();
 
 	end:
     $response->getBody()->write(json_encode($resp));
