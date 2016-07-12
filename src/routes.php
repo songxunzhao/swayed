@@ -537,7 +537,6 @@ $app->get('/v1/brand/campaigns', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
 	$user = User::where("uuid", "=", $userid)->first();
 
-    $page = isset($_GET['page']) ? $_GET['page']: 1;
 	$page_size = isset($_GET['page_size']) ? $_GET['page_size'] : 20;
 	$status = isset($_GET['status']) ? $_GET['status'] : 0;
 
@@ -571,6 +570,36 @@ $app->get('/v1/brand/campaigns', function ($request, $response, $args) {
 
     return $response;
 });
+
+$app->get('/v1/influencer/campaigns', function ($request, $response, $args) {
+    $user_id = $request->getAttribute('userid');
+    $page_size = isset($_GET['page_size']) ? $_GET['page_size'] : 20;
+    $status = isset($_GET['status']) ? $_GET['status'] : 0;
+    $data = $request->getParsedBody();
+
+    $user = User::where("uuid", "=", $user_id)->first();
+    if($user->user_type != "influencer") {
+        $resp['error'] = "You must be influencer";
+        $resp['code'] = 403;
+        goto end;
+    }
+
+    $contract_list = CampaignContract::where('influencer_id', $user->uuid);
+    if($status > 0) {
+        $contract_list = $contract_list->where('status', '=', $status);
+    }
+    $contract_list = $contract_list->orderBy("status", "ASC")->paginate($page_size);
+
+    $resp['data']['results'] = $contract_list->getCollection()->toArray();
+    $resp['data']['count'] = $contract_list->total();
+    $resp['data']['next'] = $contract_list->nextPageUrl();
+    $resp['data']['prev'] = $contract_list->previousPageUrl();
+
+    end:
+    $response->getBody()->write(json_encode($resp));
+    return $response;
+});
+
 
 $app->post('/v1/user/profile/', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
@@ -882,7 +911,6 @@ $app->post('/v1/influencers/list', function ($request, $response, $args) {
 	$user = User::where("uuid", "=", $userid)->first();
 
 	$page_size = isset($_GET['page_size']) ? $_GET['page_size'] : 20;
-	$page = isset($_GET['page']) ? $_GET['page'] : 1;
 
 	$data = $request->getParsedBody();
 	$resp = array();
