@@ -10,7 +10,7 @@ class Campaign extends \Illuminate\Database\Eloquent\Model
 	 */
 	protected $table = 'campaign';
     public function contract_list() {
-        $this->hasMany('Model\CampaignContract', 'campaign_id', 'uuid');
+        return $this->hasMany('Model\CampaignContract', 'campaign_id', 'uuid');
     }
 
     public function toArray(){
