@@ -575,7 +575,6 @@ $app->get('/v1/influencer/campaigns', function ($request, $response, $args) {
     $user_id = $request->getAttribute('userid');
     $page_size = isset($_GET['page_size']) ? $_GET['page_size'] : 20;
     $status = isset($_GET['status']) ? $_GET['status'] : 0;
-    $data = $request->getParsedBody();
 
     $user = User::where("uuid", "=", $user_id)->first();
     if($user->user_type != "influencer") {
