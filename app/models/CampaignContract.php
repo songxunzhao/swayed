@@ -14,8 +14,9 @@ class CampaignContract extends \Illuminate\Database\Eloquent\Model
     }
 
     public function toArray() {
-        $data = $this->toArray();
-        $data['campaign'] = $this->campaign->toArray();
+        $data = parent::toArray();
+        if($this->campaign)
+            $data['campaign'] = $this->campaign->toArray();
 
         return $data;
     }
