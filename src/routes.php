@@ -560,8 +560,7 @@ $app->get('/v1/brand/campaigns', function ($request, $response, $args) {
 	}
     $campaign_list = $campaign_list->orderBy("status", "ASC")->orderBy("created_at", "DESC")->paginate($page_size);
 	foreach($campaign_list as &$campaign) {
-        $campaign->num_influencers = $campaign->contract_list->count();
-        $campaign->contract_list = null;
+        $campaign->num_influencers = CampaignContract::where('campaign_id', $campaign->uuid)->count();
     }
 
 	$resp['data']['results'] = $campaign_list->getCollection()->toArray();
