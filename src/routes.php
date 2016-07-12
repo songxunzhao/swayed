@@ -559,7 +559,10 @@ $app->get('/v1/brand/campaigns', function ($request, $response, $args) {
         $campaign_list = $campaign_list->where("status", "=", $status);
 	}
     $campaign_list = $campaign_list->orderBy("status", "ASC")->orderBy("created_at", "DESC")->paginate($page_size);
-	
+	foreach($campaign_list as &$campaign) {
+        $campaign->num_influencers = $campaign->contract_list->count();
+    }
+
 	$resp['data']['results'] = $campaign_list->getCollection()->toArray();
 	$resp['data']['count'] = $campaign_list->total();
     $resp['data']['next'] = $campaign_list->nextPageUrl();

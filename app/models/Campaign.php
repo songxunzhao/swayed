@@ -9,6 +9,10 @@ class Campaign extends \Illuminate\Database\Eloquent\Model
 	 * @var string
 	 */
 	protected $table = 'campaign';
+    public function contract_list() {
+        $this->hasMany('Model\CampaignContract', 'campaign_id', 'uuid');
+    }
+
     public function toArray(){
         $data = parent::toArray();
         $data['hashtags'] = json_decode($this->hashtags);
