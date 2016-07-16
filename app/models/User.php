@@ -10,7 +10,7 @@ class User extends \Illuminate\Database\Eloquent\Model
 	 */
     
 	protected $table = 'user';
-    protected $hidden = ['password'];
+    protected $hidden = ['password', 'created_at', 'updated_at'];
 
     public function influencer()
     {
