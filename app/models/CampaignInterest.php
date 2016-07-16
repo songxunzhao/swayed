@@ -11,5 +11,5 @@ namespace Model;
 
 class CampaignInterest extends \Illuminate\Database\Eloquent\Model{
     protected $table = 'campaign_interest';
-    protected $timestamps = false;
+    public $timestamps = false;
 }
