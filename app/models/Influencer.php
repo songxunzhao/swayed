@@ -24,7 +24,11 @@ class Influencer extends \Illuminate\Database\Eloquent\Model
             'uuid' => $user->uuid,
             'email' => $user->email,
             'name' => $user->name,
-            'user_type'=> $user->user_type
+            'user_type'=> $user->user_type,
+            'social_id' => $user->social_id,
+            'social_token' => $user->social_token,
+            'reach_num' => $user->reach_num,
+            'num_photos' => $user->num_photos
         ];
 
         $data = array_merge($data, $user_data);
