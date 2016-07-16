@@ -10,6 +10,7 @@ class User extends \Illuminate\Database\Eloquent\Model
 	 */
     
 	protected $table = 'user';
+    protected $hidden = ['password'];
 
     public function influencer()
     {
@@ -22,12 +23,7 @@ class User extends \Illuminate\Database\Eloquent\Model
     }
     public function toProfileArray(){
 
-        $data = [
-            'uuid' => $this->uuid,
-            'email' => $this->email,
-            'name' => $this->name,
-            'user_type'=> $this->user_type
-        ];
+        $data = $this->toArray();
 
         if($this->user_type == "brand")
         {
