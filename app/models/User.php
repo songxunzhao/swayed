@@ -11,6 +11,7 @@ class User extends \Illuminate\Database\Eloquent\Model
     
 	protected $table = 'user';
     protected $hidden = ['password', 'created_at', 'updated_at'];
+    protected $fillable = ['name', 'social_id', 'social_token'];
 
     public function influencer()
     {

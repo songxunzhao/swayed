@@ -611,14 +611,11 @@ $app->get('/v1/influencer/campaigns', function ($request, $response, $args) {
 $app->post('/v1/user/profile/', function ($request, $response, $args) {
 	$userid = $request->getAttribute('userid');
 	$data = $request->getParsedBody();
-	$name = $data['name'];
 	$profile_img = $data['profile_img'];
-	$social_id = $data['social_id'];
-	$social_token = $data['social_token'];
 	$description = $data['description'];
 	$website = $data['website'];
-	$reach_num = $data['reach_num'];
-    $num_photos = $data['num_photos'];
+    isset($data['reach_num']) ? $data['reach_num'] = intval($data['reach_num']) : False;
+    isset($data['num_photos']) ? $data['num_photos'] = intval($data['num_photos']) : False;
 	$gender = $data['gender'];
 	$country = $data['country'];
 	$city = $data['city'];
@@ -631,14 +628,8 @@ $app->post('/v1/user/profile/', function ($request, $response, $args) {
 
 	
 	$user = User::where("uuid", "=", $userid)->first();
-	if (!empty($name)) {
-		$user->name = $name;
-        $user->social_id = $social_id;
-        $user->social_token = $social_token;
-        $user->reach_num = $reach_num;
-        $user->num_photos = $num_photos;
-		$user->save();
-	}
+    $user->update($data);
+    $user->save();
 
 	if ($user->user_type == "brand") {
         $profile = Brand::firstOrNew(['user_id'=>$userid]);
