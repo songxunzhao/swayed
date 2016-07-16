@@ -11,6 +11,5 @@ class Brand extends Model
 	 * @var string
 	 */
 	protected $table = 'brand';
-    protected $fillable = ['user_id', 'social_id', 'social_token',
-                        'description', 'website', 'profile_img'];
+    protected $fillable = ['user_id', 'description', 'website', 'profile_img'];
 }
