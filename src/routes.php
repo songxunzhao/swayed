@@ -464,7 +464,7 @@ $app->get('/v1/campaigns/{camid}', function ($request, $response, $args) {
 		goto end;
 	}
 
-	$resp['data'] = $campaign->toDetailArray();
+	$resp['data'] = $campaign->toArray();
 
 	end:
     $response->getBody()->write(json_encode($resp));
@@ -502,11 +502,7 @@ $app->post('/v1/campaigns/list', function ($request, $response, $args) {
 	}
 
     $campaigns = $query->paginate($page_size);
-    $results = [];
-    foreach($campaigns as $campaign) {
-        $results[] = $campaign->toDetailArray();
-    }
-    $resp['data']['results'] = $results;
+    $resp['data']['results'] = $campaigns->getCollection()->toArray();
     $resp['data']['next'] = $campaigns->nextPageUrl();
     $resp['data']['prev'] = $campaigns->previousPageUrl();
     $resp['data']['count'] = $campaigns->total();
