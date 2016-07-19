@@ -34,7 +34,7 @@ class Campaign extends \Illuminate\Database\Eloquent\Model
 
         if($this->brand)
         {
-            $data['brand'] = $this->brand->toSummaryArray();
+            $data['brand'] = $this->brand->toSummaryBrandArray();
         }
 
         return $data;
