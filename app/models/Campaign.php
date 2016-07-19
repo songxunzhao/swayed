@@ -13,7 +13,7 @@ class Campaign extends \Illuminate\Database\Eloquent\Model
         'allow_action', 'ban_action', 'detail_images', 'hash_tags'];
 
     public function brand() {
-        $this->belongsTo('Model\User', 'brand_id', 'uuid');
+        return $this->belongsTo('Model\User', 'brand_id', 'uuid');
     }
 
     public function toArray(){
