@@ -503,7 +503,7 @@ $app->post('/v1/campaigns/list', function ($request, $response, $args) {
 
     $campaigns = $query->paginate($page_size);
 
-    $resp['data']['results'] = $campaigns->getCollection()->toArray();
+    $resp['data']['results'] = $campaigns->getCollection()->toDetailArray();
     $resp['data']['next'] = $campaigns->nextPageUrl();
     $resp['data']['prev'] = $campaigns->previousPageUrl();
     $resp['data']['count'] = $campaigns->total();
