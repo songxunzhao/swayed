@@ -370,18 +370,18 @@ $app->post('/v1/contact_requests', function ($request, $response, $args) {
 		goto end;
 	}
 
-	$campaign = new ContactRequest;
-	$campaign->first_name = $first_name;
-	$campaign->last_name = $last_name;
-	$campaign->email = $email;
-	$campaign->phone = $phone;
-	$campaign->message = $message;
-	$campaign->status = 'open';
-	$campaign->uuid = uniqid();
-	$campaign->save();
+	$contact_request = new ContactRequest;
+	$contact_request->first_name = $first_name;
+	$contact_request->last_name = $last_name;
+	$contact_request->email = $email;
+	$contact_request->phone = $phone;
+	$contact_request->message = $message;
+	$contact_request->status = 'open';
+	$contact_request->uuid = uniqid();
+	$contact_request->save();
 	
 	$resp['data'] = array();;
-	$resp['data']['message_id'] = $campaign->uuid;
+	$resp['data']['message_id'] = $contact_request->uuid;
 	$resp['data']['message'] = 'Contact request was sent. Our operator will contact you shortly';
 
 	end:
@@ -398,14 +398,6 @@ $app->put('/v1/campaigns/ca{camid}', function ($request, $response, $args) {
 	$user = User::where("uuid", "=", $userid)->first();
 
 	$data = $request->getParsedBody();
-	$main_image = $data['main_image'];
-	$objective = $data['objective'];
-	$allow_action = $data['allow_action'];
-	$ban_action = $data['ban_action'];
-	$required_tags = $data['required_tags'];
-	$detail_images = $data['detail_images'];
-	$name = $data['name'];
-
 
 	$resp = array();
 	$resp['error'] = "";
@@ -418,7 +410,9 @@ $app->put('/v1/campaigns/ca{camid}', function ($request, $response, $args) {
 		goto end;
 	}
 
-	if (empty($main_image) || empty($objective) || empty($allow_action) || empty($ban_action)) {
+	if (empty($data['main_image']) || empty($data['objective'])
+        || empty($data['allow_action']) || empty($data['ban_action']))
+    {
 		$resp['error'] = "Some fields are missing or wrong";
 		$resp['code'] = 400;
 		goto end;
@@ -429,33 +423,19 @@ $app->put('/v1/campaigns/ca{camid}', function ($request, $response, $args) {
 		$resp['code'] = 404;
 		goto end;
 	}
-	if ($campaign->brand_id != $userid) { 
+	if ($campaign->brand_id != $userid) {
 		$resp['error'] = "Not your campaign";
 		$resp['code'] = 400;
 		goto end;
 	}
-	if (!empty($main_image)) {
-		$campaign->main_image = $main_image;
+
+	if (!empty($data['detail_images'])) {
+		$data['detail_images'] = json_encode($data['detail_images']);
 	}
-	if (!empty($name)) {
-		$campaign->name = $name;
+	if (!empty($data['hashtags'])) {
+		$data['hashtags'] = json_encode($data['hashtags']);
 	}
-	if (!empty($objective)) {
-		$campaign->objective = $objective;
-	}
-	if (!empty($allow_action)) {
-		$campaign->allow_action = $allow_action;
-	}
-	if (!empty($ban_action)) {
-		$campaign->ban_action = $ban_action;
-	}
-	if (!empty($detail_images)) {
-		$campaign->detail_images = json_encode($detail_images);
-	}
-	if (!empty($required_tags)) {
-		$campaign->hashtags = json_encode($required_tags);
-	}
-	$campaign->save();
+    $campaign->update($data);
 	
 	$resp['data'] = $campaign->toArray();
 

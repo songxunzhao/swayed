@@ -8,9 +8,7 @@ class Influencer extends \Illuminate\Database\Eloquent\Model
 	 *
 	 * @var string
 	 */
-    public function user() {
-        return $this->belongsTo('Model\User', 'user_id', 'uuid');
-    }
+
 	protected $table = 'influencer';
     protected $fillable = ['user_id', 'gender', 'country',
                             'city', 'description','profile_img',

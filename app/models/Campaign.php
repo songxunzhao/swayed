@@ -9,6 +9,13 @@ class Campaign extends \Illuminate\Database\Eloquent\Model
 	 * @var string
 	 */
 	protected $table = 'campaign';
+    protected $fillable = ['main_image', 'name', 'objective',
+        'allow_action', 'ban_action', 'detail_images', 'hash_tags'];
+
+    public function brand() {
+        $this->belongsTo('Model\User', 'brand_id', 'uuid');
+    }
+
     public function toArray(){
         $data = parent::toArray();
         $data['hashtags'] = json_decode($this->hashtags);
@@ -24,6 +31,12 @@ class Campaign extends \Illuminate\Database\Eloquent\Model
             $tag_list[] = $interest->tag;
         }
         $data['interest_tags'] = $tag_list;
+
+        if($this->brand)
+        {
+            $data['brand'] = $this->brand->toSummaryArray();
+        }
+
         return $data;
     }
 }
