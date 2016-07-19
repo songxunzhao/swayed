@@ -504,7 +504,7 @@ $app->post('/v1/campaigns/list', function ($request, $response, $args) {
     $campaigns = $query->paginate($page_size);
     $results = [];
     foreach($campaigns as $campaign) {
-        $results[] = $campaign->toDetailArray();
+        $results[] = $campaign->toSummaryBrandArray();
     }
     $resp['data']['results'] = $results;
     $resp['data']['next'] = $campaigns->nextPageUrl();

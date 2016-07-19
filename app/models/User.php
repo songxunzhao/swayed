@@ -38,16 +38,14 @@ class User extends \Illuminate\Database\Eloquent\Model
         }
         return $data;
     }
-    public function toSummaryArray() {
+    public function toSummaryBrandArray() {
         $data = [];
         $data['name'] = $this->name;
         if($this->user_type == "brand" && $this->brand)
         {
             $data['profile_img'] = $this->brand->profile_img;
-        }
-        else if($this->user_type == "influencer" && $this->influencer)
-        {
-            $data['profile_img'] = $this->influencer->profile_img;
+            $data['description'] = $this->brand->description;
+            $data['website'] = $this->brand->website;
         }
         return $data;
     }
