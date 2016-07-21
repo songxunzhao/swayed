@@ -10,7 +10,7 @@ use Model\InterestTag;
 use Model\Token;
 use Model\User;
 use Model\UserInterest;
-use Controller;
+use \Controller;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Database\Capsule\Manager as DB;
 
