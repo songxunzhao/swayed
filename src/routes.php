@@ -1,16 +1,6 @@
 <?php
-use Model\Brand;
-use Model\Campaign;
-use Model\CampaignContract;
-use Model\CampaignInterest;
-use Model\ContactRequest;
-use Model\Faq;
-use Model\Influencer;
-use Model\InterestTag;
+require __DIR__ . '/../src/controller.php';
 use Model\Token;
-use Model\User;
-use Model\UserInterest;
-use \Controller;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Database\Capsule\Manager as DB;
 
@@ -101,54 +91,54 @@ $app->add(function ($request, $response, $next) {
 
 // Routes
 
-$app->post('/v1/user/signup', 'Controller:signupUser');
+$app->post('/v1/user/signup', 'App\Controller:signupUser');
 
-$app->post('/v1/user/login', 'Controller:loginUser');
-
-
-$app->post('/v1/images', 'Controller:uploadImage');
-
-$app->post('/v1/campaigns', 'Controller:createCampaign');
-
-$app->get('/v1/contact_requests/{reqid}', 'Controller:getContactRequest');
+$app->post('/v1/user/login', 'App\Controller:loginUser');
 
 
-$app->post('/v1/contact_requests', 'Controller:createContactRequest');
+$app->post('/v1/images', 'App\Controller:uploadImage');
+
+$app->post('/v1/campaigns', 'App\Controller:createCampaign');
+
+$app->get('/v1/contact_requests/{reqid}', 'App\Controller:getContactRequest');
+
+
+$app->post('/v1/contact_requests', 'App\Controller:createContactRequest');
 
 
 
-$app->put('/v1/campaigns/ca{camid}', 'Controller:updateCampaign');
+$app->put('/v1/campaigns/ca{camid}', 'App\Controller:updateCampaign');
 
 
-$app->get('/v1/campaigns/{camid}', 'Controller:getCampaign');
+$app->get('/v1/campaigns/{camid}', 'App\Controller:getCampaign');
 
-$app->post('/v1/campaigns/list', 'Controller:getCampaignList');
+$app->post('/v1/campaigns/list', 'App\Controller:getCampaignList');
 
-$app->get('/v1/brand/campaigns', 'Controller:getBrandCampaignList');
+$app->get('/v1/brand/campaigns', 'App\Controller:getBrandCampaignList');
 
-$app->get('/v1/influencer/campaigns', 'Controller:getInfluencerCampaignContract');
-
-
-$app->post('/v1/user/profile/', 'Controller:getProfile');
+$app->get('/v1/influencer/campaigns', 'App\Controller:getInfluencerCampaignContract');
 
 
-$app->post('/v1/user/rate', 'Controller:updateUserRate');
-
-$app->post('/v1/user/interests', 'Controller:updateUserInterests');
-
-$app->get('/v1/interest_tags', 'Controller:getInterestTags');
-
-$app->post('/v1/campaigns/{camid}/apply', 'Controller:applyForCampaign');
-
-$app->post('/v1/campaigns/{camid}/influencers/{influid}/offer', 'Controller:offerCampaign');
+$app->post('/v1/user/profile/', 'App\Controller:getProfile');
 
 
-$app->get('/v1/campaigns/{camid}/influencers', 'Controller:getContractsForCampaign');
+$app->post('/v1/user/rate', 'App\Controller:updateUserRate');
 
-$app->get('/v1/campaigns/{camid}/cancel', 'Controller:cancelCampaign');
+$app->post('/v1/user/interests', 'App\Controller:updateUserInterests');
+
+$app->get('/v1/interest_tags', 'App\Controller:getInterestTags');
+
+$app->post('/v1/campaigns/{camid}/apply', 'App\Controller:applyForCampaign');
+
+$app->post('/v1/campaigns/{camid}/influencers/{influid}/offer', 'App\Controller:offerCampaign');
 
 
-$app->post('/v1/influencers/list', 'Controller:searchInfluencerList');
+$app->get('/v1/campaigns/{camid}/influencers', 'App\Controller:getContractsForCampaign');
+
+$app->get('/v1/campaigns/{camid}/cancel', 'App\Controller:cancelCampaign');
+
+
+$app->post('/v1/influencers/list', 'App\Controller:searchInfluencerList');
 
 $app->get('/v1/faqs', 'Controller:getFaqList');
 

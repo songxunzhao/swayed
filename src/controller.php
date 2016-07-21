@@ -5,7 +5,20 @@
  * Date: 7/22/2016
  * Time: 1:19 AM
  */
-
+namespace App;
+use Model\Brand;
+use Model\Campaign;
+use Model\CampaignContract;
+use Model\CampaignInterest;
+use Model\ContactRequest;
+use Model\Faq;
+use Model\Influencer;
+use Model\InterestTag;
+use Model\Token;
+use Model\User;
+use Model\UserInterest;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Database\Capsule\Manager as DB;
 class Controller {
     public function signupUser($request, $response, $args) {
         $data = $request->getParsedBody();
