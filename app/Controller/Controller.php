@@ -5,7 +5,7 @@
  * Date: 7/22/2016
  * Time: 1:19 AM
  */
-namespace App\Controllers;
+namespace App\Controller;
 use App\Model\Brand;
 use App\Model\Campaign;
 use App\Model\CampaignContract;
