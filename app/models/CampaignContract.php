@@ -20,4 +20,10 @@ class CampaignContract extends \Illuminate\Database\Eloquent\Model
 
         return $data;
     }
+    public static $STATUS_APPLIED = 1;
+    public static $STATUS_DECLINED = 2;
+    public static $STATUS_OFFER = 3;
+    public static $STATUS_REJECTED = 4;
+    public static $STATUS_PROGRESS = 5;
+    public static $STATUS_CLOSED = 6;
 }

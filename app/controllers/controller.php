@@ -17,8 +17,10 @@ use Model\InterestTag;
 use Model\Token;
 use Model\User;
 use Model\UserInterest;
+use App\Helper\Paypal;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Database\Capsule\Manager as DB;
+
 class Controller {
     public function signupUser($request, $response, $args) {
         $data = $request->getParsedBody();
@@ -89,7 +91,8 @@ class Controller {
         $resp = array();
         $resp['error'] = "";
         $resp['code'] = 200;
-        //valiate
+
+        //validate
         if (empty($password) || empty($email)) {
             $resp['error'] = "Some fields are missing or wrong";
             $resp['code'] = 400;
@@ -132,7 +135,7 @@ class Controller {
         return $response;
     }
 
-    function uploadImage($request, $response, $args) {
+    public function uploadImage($request, $response, $args) {
         $userid = $request->getAttribute('userid');
         $resp = array();
         $resp['error'] = "";
@@ -169,7 +172,7 @@ class Controller {
         return $response;
     }
 
-    function createCampaign($request, $response, $args) {
+    public function createCampaign($request, $response, $args) {
         $user_id = $request->getAttribute('userid');
         $user = User::where("uuid", "=", $user_id)->first();
 
@@ -232,7 +235,7 @@ class Controller {
         return $response;
     }
 
-    function getContactRequest($request, $response, $args) {
+    public function getContactRequest($request, $response, $args) {
         $userid = $request->getAttribute('userid');
         $reqid = ($request->getAttribute("reqid"));
 
@@ -265,7 +268,7 @@ class Controller {
         return $response;
     }
 
-    function createContactRequest($request, $response, $args) {
+    public function createContactRequest($request, $response, $args) {
         $userid = $request->getAttribute('userid');
         $user = User::where("uuid", "=", $userid)->first();
 
@@ -308,7 +311,7 @@ class Controller {
         return $response;
     }
 
-    function updateCampaign($request, $response, $args) {
+    public function updateCampaign($request, $response, $args) {
         $userid = $request->getAttribute('userid');
         $camid = 'ca'.($request->getAttribute("camid"));
         $user = User::where("uuid", "=", $userid)->first();
@@ -361,7 +364,7 @@ class Controller {
         return $response;
     }
 
-    function getCampaign($request, $response, $args) {
+    public function getCampaign($request, $response, $args) {
         $userid = $request->getAttribute('userid');
         $camid = ($request->getAttribute("camid"));
         $user = User::where("uuid", "=", $userid)->first();
@@ -387,7 +390,7 @@ class Controller {
         return $response;
     }
 
-    function getCampaignList($request, $response, $args) {
+    public function getCampaignList($request, $response, $args) {
         $userid = $request->getAttribute('userid');
         $user = User::where("uuid", "=", $userid)->first();
 
@@ -427,7 +430,7 @@ class Controller {
         return $response;
     }
 
-    function getBrandCampaignList($request, $response, $args) {
+    public function getBrandCampaignList($request, $response, $args) {
         $userid = $request->getAttribute('userid');
         $user = User::where("uuid", "=", $userid)->first();
 
@@ -468,7 +471,7 @@ class Controller {
         return $response;
     }
 
-    function getInfluencerCampaignContract($request, $response, $args) {
+    public function getInfluencerCampaignContract($request, $response, $args) {
         $user_id = $request->getAttribute('userid');
         $page_size = isset($_GET['page_size']) ? $_GET['page_size'] : 20;
         $status = isset($_GET['status']) ? $_GET['status'] : 0;
@@ -501,7 +504,7 @@ class Controller {
         return $response;
     }
 
-    function getProfile($request, $response, $args) {
+    public function getProfile($request, $response, $args) {
         $userid = $request->getAttribute('userid');
         $data = $request->getParsedBody();
         $profile_img = $data['profile_img'];
@@ -544,7 +547,7 @@ class Controller {
         return $response;
     }
 
-    function updateUserRate($request, $response, $args) {
+    public function updateUserRate($request, $response, $args) {
         $userid = $request->getAttribute('userid');
 
         $data = $request->getParsedBody();
@@ -578,7 +581,7 @@ class Controller {
         return $response;
     }
 
-    function updateUserInterests($request, $response, $args) {
+    public function updateUserInterests($request, $response, $args) {
         $userid = $request->getAttribute('userid');
 
         $data = $request->getParsedBody();
@@ -622,7 +625,7 @@ class Controller {
         return $response;
     }
 
-    function getInterestTags($request, $response, $args) {
+    public function getInterestTags($request, $response, $args) {
         $userid = $request->getAttribute('userid');
 
         $resp = array();
@@ -642,7 +645,7 @@ class Controller {
         return $response;
     }
 
-    function applyForCampaign($request, $response, $args) {
+    public function applyForCampaign($request, $response, $args) {
         $userid = $request->getAttribute('userid');
         $camid = ($request->getAttribute("camid"));
 
@@ -687,7 +690,7 @@ class Controller {
         return $response;
     }
 
-    function offerCampaign($request, $response, $args) {
+    public function offerCampaign($request, $response, $args) {
         $userid = $request->getAttribute('userid');
         $camid = ($request->getAttribute("camid"));
         $influid = ($request->getAttribute("influid"));
@@ -723,8 +726,10 @@ class Controller {
             $campaignContract->influencer_id = $influid;
             $campaignContract->status = 3;
             $campaignContract->save();
-        }
 
+//            $paypal = new Paypal();
+//            $paypal->createPayRequest();
+        }
 
         $resp['data'] = $campaignContract->toArray();
         end:
@@ -733,7 +738,8 @@ class Controller {
         return $response;
     }
 
-    function getContractsForCampaign($request, $response, $args) {
+
+    public function getContractsForCampaign($request, $response, $args) {
         $userid = $request->getAttribute('userid');
         $camid = ($request->getAttribute("camid"));
 
@@ -765,7 +771,7 @@ class Controller {
         return $response;
     }
 
-    function cancelCampaign($request, $response, $args) {
+    public function cancelCampaign($request, $response, $args) {
         $userid = $request->getAttribute('userid');
         $camid = ($request->getAttribute("camid"));
 
@@ -798,7 +804,7 @@ class Controller {
         return $response;
     }
 
-    function searchInfluencerList($request, $response, $args) {
+    public function searchInfluencerList($request, $response, $args) {
         $userid = $request->getAttribute('userid');
         $user = User::where("uuid", "=", $userid)->first();
 
@@ -848,7 +854,7 @@ class Controller {
         return $response;
     }
 
-    function getFaqList($request, $response, $args) {
+    public function getFaqList($request, $response, $args) {
         $userid = $request->getAttribute('userid');
         $user = User::where("uuid", "=", $userid)->first();
 
@@ -872,4 +878,5 @@ class Controller {
 
         return $response;
     }
+
 }

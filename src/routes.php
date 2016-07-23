@@ -1,5 +1,6 @@
 <?php
-require __DIR__ . '/../src/controller.php';
+require __DIR__ . '/../src/Controller.php';
+require __DIR__ . '/../src/CampaignContractController.php';
 use Model\Token;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Database\Capsule\Manager as DB;
@@ -132,11 +133,12 @@ $app->post('/v1/campaigns/{camid}/apply', 'App\Controller:applyForCampaign');
 
 $app->post('/v1/campaigns/{camid}/influencers/{influid}/offer', 'App\Controller:offerCampaign');
 
-
 $app->get('/v1/campaigns/{camid}/influencers', 'App\Controller:getContractsForCampaign');
 
 $app->get('/v1/campaigns/{camid}/cancel', 'App\Controller:cancelCampaign');
 
+$app->get('/v1/campaign_contracts/{contract_id}/{action:(award|decline|accept|reject)}',
+    'App\CampaignContractController:get');
 
 $app->post('/v1/influencers/list', 'App\Controller:searchInfluencerList');
 

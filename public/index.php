@@ -1,6 +1,6 @@
 <?php
 use Illuminate\Database\Capsule\Manager as Capsule;
-
+use App\Loader\Config;
 if (PHP_SAPI == 'cli-server') {
     // To help the built-in PHP dev server, check if the request was actually for
     // something which should probably be served as a static file
@@ -15,7 +15,7 @@ require __DIR__ . '/../vendor/autoload.php';
 session_start();
 
 // Instantiate the app
-$settings = require __DIR__ . '/../src/settings.php';
+$settings = Config::loadConfig('app');
 $app = new \Slim\App($settings);
 
 // Set up dependencies
@@ -39,18 +39,9 @@ define("UPLOAD_PATH", __DIR__ . '/upload');
 define("BASEURL", "http://api.swayedserv.com/swayed/public");
 
 // Database information
-$settings = array(
-    'driver' => 'mysql',
-    'host' => '127.0.0.1',
-    'database' => 'webdev_swayed',
-    'username' => 'webdev_swayed',
-    'password' => '$?wH,uFEq7sK',
-    'collation' => 'utf8_general_ci',
-    'prefix' => '',
-    'charset'   => 'utf8',
-);
+$db_settings = Config::loadConfig('database');
 $capsule = new Capsule;
-$capsule->addConnection($settings);
+$capsule->addConnection($db_settings);
 $capsule->bootEloquent();
 $capsule->setAsGlobal();
 
