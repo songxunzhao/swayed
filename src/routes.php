@@ -1,7 +1,7 @@
 <?php
-require __DIR__ . '/../app/Controllers/Controller.php';
-require __DIR__ . '/../app/Controllers/CampaignContractController.php';
-use Model\Token;
+use App\Controller\Controller;
+use App\Controller\CampaignContractController;
+use App\Model\Token;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Database\Capsule\Manager as DB;
 
