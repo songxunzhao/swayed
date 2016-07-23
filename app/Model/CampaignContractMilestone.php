@@ -6,7 +6,7 @@
  * Time: 10:52 AM
  */
 
-namespace Model;
+namespace App\Model;
 
 
 class CampaignContractMilestone {

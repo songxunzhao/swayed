@@ -27,14 +27,6 @@ require __DIR__ . '/../src/middleware.php';
 // Register routes
 require __DIR__ . '/../src/routes.php';
 
-//load model
-foreach (scandir((__DIR__ . '/../app/Model/')) as $filename) {
-    $path = (__DIR__ . '/../app/Model') . '/' . $filename;
-    if (is_file($path)) {
-        require $path;
-    }
-}
-
 define("UPLOAD_PATH", __DIR__ . '/upload');
 define("BASEURL", "http://api.swayedserv.com/swayed/public");
 

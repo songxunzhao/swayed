@@ -6,7 +6,7 @@
  * Time: 12:02 AM
  */
 
-namespace Model;
+namespace App\Model;
 
 
 class CampaignInterest extends \Illuminate\Database\Eloquent\Model{

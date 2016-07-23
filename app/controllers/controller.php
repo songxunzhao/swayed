@@ -5,18 +5,18 @@
  * Date: 7/22/2016
  * Time: 1:19 AM
  */
-namespace App;
-use Model\Brand;
-use Model\Campaign;
-use Model\CampaignContract;
-use Model\CampaignInterest;
-use Model\ContactRequest;
-use Model\Faq;
-use Model\Influencer;
-use Model\InterestTag;
-use Model\Token;
-use Model\User;
-use Model\UserInterest;
+namespace App\Controllers;
+use App\Model\Brand;
+use App\Model\Campaign;
+use App\Model\CampaignContract;
+use App\Model\CampaignInterest;
+use App\Model\ContactRequest;
+use App\Model\Faq;
+use App\Model\Influencer;
+use App\Model\InterestTag;
+use App\Model\Token;
+use App\Model\User;
+use App\Model\UserInterest;
 use App\Helper\Paypal;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Database\Capsule\Manager as DB;
