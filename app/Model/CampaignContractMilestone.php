@@ -12,6 +12,6 @@ namespace App\Model;
 class CampaignContractMilestone {
     protected $table = 'campaign_contract';
     public function campaign_contract() {
-        return $this->belongsTo('Model\CampaignContract', 'contract_id', 'uuid');
+        return $this->belongsTo('App\Model\CampaignContract', 'contract_id', 'uuid');
     }
 }

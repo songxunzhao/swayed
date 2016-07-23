@@ -10,7 +10,7 @@ class CampaignContract extends \Illuminate\Database\Eloquent\Model
 	 */
 	protected $table = 'campaign_contract';
     public function campaign() {
-        return $this->belongsTo('Model\Campaign', 'campaign_id', 'uuid');
+        return $this->belongsTo('App\Model\Campaign', 'campaign_id', 'uuid');
     }
 
     public function toArray() {
