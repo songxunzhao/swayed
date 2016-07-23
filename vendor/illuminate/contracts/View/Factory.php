@@ -61,7 +61,7 @@ interface Factory
     public function creator($views, $callback);
 
     /**
-     * Add a new namespace to the loader.
+     * Add a new namespace to the Loader.
      *
      * @param  string  $namespace
      * @param  string|array  $hints

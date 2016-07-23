@@ -67,7 +67,7 @@ class TranslatorCacheTest extends \PHPUnit_Framework_TestCase
         $translator->addResource($format, array($msgid => 'OK'), $locale);
         $translator->trans($msgid);
 
-        // Try again and see we get a valid result whilst no loader can be used
+        // Try again and see we get a valid result whilst no Loader can be used
         $translator = new Translator($locale, null, $this->tmpDir, $debug);
         $translator->addLoader($format, $this->createFailingLoader());
         $translator->addResource($format, array($msgid => 'OK'), $locale);
@@ -77,11 +77,11 @@ class TranslatorCacheTest extends \PHPUnit_Framework_TestCase
     public function testCatalogueIsReloadedWhenResourcesAreNoLongerFresh()
     {
         /*
-         * The testThatACacheIsUsed() test showed that we don't need the loader as long as the cache
+         * The testThatACacheIsUsed() test showed that we don't need the Loader as long as the cache
          * is fresh.
          *
          * Now we add a Resource that is never fresh and make sure that the
-         * cache is discarded (the loader is called twice).
+         * cache is discarded (the Loader is called twice).
          *
          * We need to run this for debug=true only because in production the cache
          * will never be revalidated.
@@ -183,7 +183,7 @@ class TranslatorCacheTest extends \PHPUnit_Framework_TestCase
         /*
          * As a safeguard against potential BC breaks, make sure that primary and fallback
          * catalogues (reachable via getFallbackCatalogue()) always contain the full set of
-         * messages provided by the loader. This must also be the case when these catalogues
+         * messages provided by the Loader. This must also be the case when these catalogues
          * are (internally) read from a cache.
          *
          * Optimizations inside the translator must not change this behaviour.
@@ -238,14 +238,14 @@ class TranslatorCacheTest extends \PHPUnit_Framework_TestCase
 
         // prime the cache
         $translator = new Translator('fr', null, $this->tmpDir, true);
-        $translator->addLoader('loader', $loader);
-        $translator->addResource('loader', 'foo', 'fr');
+        $translator->addLoader('Loader', $loader);
+        $translator->addResource('Loader', 'foo', 'fr');
         $translator->trans('foo');
 
         // prime the cache second time
         $translator = new Translator('fr', null, $this->tmpDir, true);
-        $translator->addLoader('loader', $loader);
-        $translator->addResource('loader', 'foo', 'fr');
+        $translator->addLoader('Loader', $loader);
+        $translator->addResource('Loader', 'foo', 'fr');
         $translator->trans('foo');
     }
 

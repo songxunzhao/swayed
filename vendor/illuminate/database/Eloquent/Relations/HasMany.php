@@ -17,7 +17,7 @@ class HasMany extends HasOneOrMany
     }
 
     /**
-     * Initialize the relation on a set of models.
+     * Initialize the relation on a set of Model.
      *
      * @param  array   $models
      * @param  string  $relation

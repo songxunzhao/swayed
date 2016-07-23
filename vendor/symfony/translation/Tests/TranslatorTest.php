@@ -95,10 +95,10 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
 
         $locale = 'whatever';
         $translator = new Translator($locale);
-        $translator->addLoader('loader-a', new ArrayLoader());
-        $translator->addLoader('loader-b', new ArrayLoader());
-        $translator->addResource('loader-a', array('foo' => 'foofoo'), $locale, 'domain-a');
-        $translator->addResource('loader-b', array('bar' => 'foobar'), $locale, 'domain-b');
+        $translator->addLoader('Loader-a', new ArrayLoader());
+        $translator->addLoader('Loader-b', new ArrayLoader());
+        $translator->addResource('Loader-a', array('foo' => 'foofoo'), $locale, 'domain-a');
+        $translator->addResource('Loader-b', array('bar' => 'foobar'), $locale, 'domain-b');
 
         /*
          * Test that we get a single catalogue comprising messages

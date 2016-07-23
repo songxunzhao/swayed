@@ -28,10 +28,10 @@ class ChainExtractor implements ExtractorInterface
     private $extractors = array();
 
     /**
-     * Adds a loader to the translation extractor.
+     * Adds a Loader to the translation extractor.
      *
-     * @param string             $format    The format of the loader
-     * @param ExtractorInterface $extractor The loader
+     * @param string             $format    The format of the Loader
+     * @param ExtractorInterface $extractor The Loader
      */
     public function addExtractor($format, ExtractorInterface $extractor)
     {

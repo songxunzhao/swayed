@@ -69,7 +69,7 @@ class BelongsTo extends Relation
         if (static::$constraints) {
             // For belongs to relationships, which are essentially the inverse of has one
             // or has many relationships, we need to actually query on the primary key
-            // of the related models matching on the foreign key that's on a parent.
+            // of the related Model matching on the foreign key that's on a parent.
             $table = $this->related->getTable();
 
             $this->query->where($table.'.'.$this->otherKey, '=', $this->parent->{$this->foreignKey});
@@ -136,16 +136,16 @@ class BelongsTo extends Relation
      */
     public function addEagerConstraints(array $models)
     {
-        // We'll grab the primary key name of the related models since it could be set to
+        // We'll grab the primary key name of the related Model since it could be set to
         // a non-standard name and not "id". We will then construct the constraint for
-        // our eagerly loading query so it returns the proper models from execution.
+        // our eagerly loading query so it returns the proper Model from execution.
         $key = $this->related->getTable().'.'.$this->otherKey;
 
         $this->query->whereIn($key, $this->getEagerModelKeys($models));
     }
 
     /**
-     * Gather the keys from an array of related models.
+     * Gather the keys from an array of related Model.
      *
      * @param  array  $models
      * @return array
@@ -154,7 +154,7 @@ class BelongsTo extends Relation
     {
         $keys = [];
 
-        // First we need to gather all of the keys from the parent models so we know what
+        // First we need to gather all of the keys from the parent Model so we know what
         // to query for via the eager loading query. We will add them to an array then
         // execute a "where in" statement to gather up all of those related records.
         foreach ($models as $model) {
@@ -174,7 +174,7 @@ class BelongsTo extends Relation
     }
 
     /**
-     * Initialize the relation on a set of models.
+     * Initialize the relation on a set of Model.
      *
      * @param  array   $models
      * @param  string  $relation
@@ -203,7 +203,7 @@ class BelongsTo extends Relation
 
         $other = $this->otherKey;
 
-        // First we will get to build a dictionary of the child models by their primary
+        // First we will get to build a dictionary of the child Model by their primary
         // key of the relationship, then we can easily match the children back onto
         // the parents using that dictionary and the primary key of the children.
         $dictionary = [];

@@ -62,9 +62,9 @@ abstract class ServiceProvider
      */
     protected function mergeConfigFrom($path, $key)
     {
-        $config = $this->app['config']->get($key, []);
+        $config = $this->app['Config']->get($key, []);
 
-        $this->app['config']->set($key, array_merge(require $path, $config));
+        $this->app['Config']->set($key, array_merge(require $path, $config));
     }
 
     /**

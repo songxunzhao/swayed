@@ -100,7 +100,7 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
     /**
      * Adds a Loader.
      *
-     * @param string          $format The name of the loader (@see addResource())
+     * @param string          $format The name of the Loader (@see addResource())
      * @param LoaderInterface $loader A LoaderInterface instance
      */
     public function addLoader($format, LoaderInterface $loader)
@@ -111,7 +111,7 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
     /**
      * Adds a Resource.
      *
-     * @param string $format   The name of the loader (@see addLoader())
+     * @param string $format   The name of the Loader (@see addLoader())
      * @param mixed  $resource The resource name
      * @param string $locale   The locale
      * @param string $domain   The domain
@@ -367,7 +367,7 @@ EOF
         if (isset($this->resources[$locale])) {
             foreach ($this->resources[$locale] as $resource) {
                 if (!isset($this->loaders[$resource[0]])) {
-                    throw new \RuntimeException(sprintf('The "%s" translation loader is not registered.', $resource[0]));
+                    throw new \RuntimeException(sprintf('The "%s" translation Loader is not registered.', $resource[0]));
                 }
                 $this->catalogues[$locale]->addCatalogue($this->loaders[$resource[0]]->load($resource[1], $locale, $resource[2]));
             }

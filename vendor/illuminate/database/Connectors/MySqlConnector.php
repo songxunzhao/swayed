@@ -39,7 +39,7 @@ class MySqlConnector extends Connector implements ConnectorInterface
 
         $connection->prepare($names)->execute();
 
-        // Next, we will check to see if a timezone has been specified in this config
+        // Next, we will check to see if a timezone has been specified in this Config
         // and if it has we will issue a statement to modify the timezone with the
         // database. Setting this DB timezone is an optional configuration item.
         if (isset($config['timezone'])) {
@@ -56,7 +56,7 @@ class MySqlConnector extends Connector implements ConnectorInterface
     /**
      * Create a DSN string from a configuration.
      *
-     * Chooses socket or host/port based on the 'unix_socket' config value.
+     * Chooses socket or host/port based on the 'unix_socket' Config value.
      *
      * @param  array   $config
      * @return string

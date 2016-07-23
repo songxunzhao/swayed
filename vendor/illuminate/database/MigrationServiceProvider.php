@@ -50,7 +50,7 @@ class MigrationServiceProvider extends ServiceProvider
     protected function registerRepository()
     {
         $this->app->singleton('migration.repository', function ($app) {
-            $table = $app['config']['database.migrations'];
+            $table = $app['Config']['database.migrations'];
 
             return new DatabaseMigrationRepository($app['db'], $table);
         });

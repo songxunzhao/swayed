@@ -55,7 +55,7 @@ class ClassLoader
     }
 
     /**
-     * Register the given class loader on the auto-loader stack.
+     * Register the given class Loader on the auto-Loader stack.
      *
      * @return void
      */
@@ -67,7 +67,7 @@ class ClassLoader
     }
 
     /**
-     * Add directories to the class loader.
+     * Add directories to the class Loader.
      *
      * @param  string|array  $directories
      * @return void
@@ -78,7 +78,7 @@ class ClassLoader
     }
 
     /**
-     * Remove directories from the class loader.
+     * Remove directories from the class Loader.
      *
      * @param  string|array  $directories
      * @return void
@@ -93,7 +93,7 @@ class ClassLoader
     }
 
     /**
-     * Gets all the directories registered with the loader.
+     * Gets all the directories registered with the Loader.
      *
      * @return array
      */

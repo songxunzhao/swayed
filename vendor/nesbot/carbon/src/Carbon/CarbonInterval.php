@@ -19,7 +19,7 @@ use Symfony\Component\Translation\Loader\ArrayLoader;
 
 /**
  * A simple API extension for DateInterval.
- * The implemenation provides helpers to handle weeks but only days are saved.
+ * The implemenation provides Helper to handle weeks but only days are saved.
  * Weeks are calculated based on the total days of the current instance.
  *
  * @property int $years Total years of the current interval.
@@ -168,7 +168,7 @@ class CarbonInterval extends DateInterval
     }
 
     /**
-     * Provide static helpers to create instances.  Allows CarbonInterval::years(3).
+     * Provide static Helper to create instances.  Allows CarbonInterval::years(3).
      *
      * Note: This is done using the magic method to allow static and instance methods to
      *       have the same names.

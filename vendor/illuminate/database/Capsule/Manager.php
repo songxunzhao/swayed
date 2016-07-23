@@ -32,7 +32,7 @@ class Manager
         $this->setupContainer($container ?: new Container);
 
         // Once we have the container setup, we will setup the default configuration
-        // options in the container "config" binding. This will make the database
+        // options in the container "Config" binding. This will make the database
         // manager behave correctly since all the correct binding are in place.
         $this->setupDefaultConfiguration();
 
@@ -46,9 +46,9 @@ class Manager
      */
     protected function setupDefaultConfiguration()
     {
-        $this->container['config']['database.fetch'] = PDO::FETCH_OBJ;
+        $this->container['Config']['database.fetch'] = PDO::FETCH_OBJ;
 
-        $this->container['config']['database.default'] = 'default';
+        $this->container['Config']['database.default'] = 'default';
     }
 
     /**
@@ -117,11 +117,11 @@ class Manager
      */
     public function addConnection(array $config, $name = 'default')
     {
-        $connections = $this->container['config']['database.connections'];
+        $connections = $this->container['Config']['database.connections'];
 
         $connections[$name] = $config;
 
-        $this->container['config']['database.connections'] = $connections;
+        $this->container['Config']['database.connections'] = $connections;
     }
 
     /**
@@ -149,7 +149,7 @@ class Manager
      */
     public function setFetchMode($fetchMode)
     {
-        $this->container['config']['database.fetch'] = $fetchMode;
+        $this->container['Config']['database.fetch'] = $fetchMode;
 
         return $this;
     }

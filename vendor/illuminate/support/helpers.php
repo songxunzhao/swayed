@@ -8,7 +8,7 @@ use Illuminate\Contracts\Support\Htmlable;
 
 if (! function_exists('append_config')) {
     /**
-     * Assign high numeric IDs to a config item to force appending.
+     * Assign high numeric IDs to a Config item to force appending.
      *
      * @param  array  $array
      * @return array

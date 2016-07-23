@@ -9,7 +9,7 @@ namespace App\Loader;
 
 class Config {
     public static function loadConfig($name) {
-        $base_dir = __DIR__ . '/../config/';
+        $base_dir = __DIR__ . '/../Config/';
         if(ends_with($name, '.php'))
             $config = require $base_dir . $name;
         else

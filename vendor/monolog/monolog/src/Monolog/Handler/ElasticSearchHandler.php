@@ -41,7 +41,7 @@ class ElasticSearchHandler extends AbstractProcessingHandler
     protected $client;
 
     /**
-     * @var array Handler config options
+     * @var array Handler Config options
      */
     protected $options = array();
 

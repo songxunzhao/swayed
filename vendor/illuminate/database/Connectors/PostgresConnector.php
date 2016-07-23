@@ -39,7 +39,7 @@ class PostgresConnector extends Connector implements ConnectorInterface
 
         $connection->prepare("set names '$charset'")->execute();
 
-        // Next, we will check to see if a timezone has been specified in this config
+        // Next, we will check to see if a timezone has been specified in this Config
         // and if it has we will issue a statement to modify the timezone with the
         // database. Setting this DB timezone is an optional configuration item.
         if (isset($config['timezone'])) {
