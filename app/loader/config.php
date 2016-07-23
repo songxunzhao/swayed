@@ -14,6 +14,6 @@ class Config {
             $config = require $base_dir . $name;
         else
             $config = require $base_dir . $name . '.php';
-
+        return $config;
     }
 }
