@@ -92,7 +92,7 @@ $app->add(function ($request, $response, $next) {
 
 // Routes
 
-$app->post('/v1/user/signup', 'Controller:signupUser');
+$app->post('/v1/user/signup', 'App\Controller\Controller:signupUser');
 
 $app->post('/v1/user/login', 'App\Controller\Controller:loginUser');
 
