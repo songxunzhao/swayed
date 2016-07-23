@@ -137,7 +137,7 @@ $app->get('/v1/campaigns/{camid}/influencers', 'App\Controller:getContractsForCa
 
 $app->get('/v1/campaigns/{camid}/cancel', 'App\Controller:cancelCampaign');
 
-$app->get('/v1/campaign_contracts/{contract_id}/{action:(award|decline|accept|reject)}',
+$app->get('/v1/campaign_contracts/{contract_id}/{action:award|decline|accept|reject}',
     'App\CampaignContractController:get');
 
 $app->post('/v1/influencers/list', 'App\Controller:searchInfluencerList');
