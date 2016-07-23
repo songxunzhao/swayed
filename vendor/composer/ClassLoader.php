@@ -13,19 +13,19 @@
 namespace Composer\Autoload;
 
 /**
- * ClassLoader implements a PSR-0, PSR-4 and classmap class Loader.
+ * ClassLoader implements a PSR-0, PSR-4 and classmap class loader.
  *
- *     $Loader = new \Composer\Autoload\ClassLoader();
+ *     $loader = new \Composer\Autoload\ClassLoader();
  *
  *     // register classes with namespaces
- *     $Loader->add('Symfony\Component', __DIR__.'/component');
- *     $Loader->add('Symfony',           __DIR__.'/framework');
+ *     $loader->add('Symfony\Component', __DIR__.'/component');
+ *     $loader->add('Symfony',           __DIR__.'/framework');
  *
  *     // activate the autoloader
- *     $Loader->register();
+ *     $loader->register();
  *
  *     // to enable searching the include path (eg. for PEAR packages)
- *     $Loader->setUseIncludePath(true);
+ *     $loader->setUseIncludePath(true);
  *
  * In this example, if you try to use a class in the Symfony\Component
  * namespace or one of its children (Symfony\Component\Console for instance),

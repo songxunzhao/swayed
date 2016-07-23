@@ -8,8 +8,5 @@ $baseDir = dirname($vendorDir);
 return array(
     'Psr\\Log\\' => array($vendorDir . '/psr/log'),
     'Pimple' => array($vendorDir . '/pimple/pimple/src'),
-    'PayPal\\Types' => array($vendorDir . '/paypal/adaptivepayments-sdk-php/lib'),
-    'PayPal\\Service' => array($vendorDir . '/paypal/adaptivepayments-sdk-php/lib'),
-    'PayPal' => array($vendorDir . '/paypal/sdk-core-php/lib'),
     'Doctrine\\Common\\Inflector\\' => array($vendorDir . '/doctrine/inflector/lib'),
 );
